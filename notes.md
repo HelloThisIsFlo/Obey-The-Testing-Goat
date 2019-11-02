@@ -6,4 +6,4 @@
 [ ] Support more than one list
 [ ] Allow multiple lists for multiple users
 [x] Clean up after FT runs
-[ ] Remove `time.sleep` in FT
+[x] Remove `time.sleep` in FT
