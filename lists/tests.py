@@ -4,7 +4,9 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 
 from lists.views import home_page
-from lists.models import Item
+from lists.models import Item, List
+
+from superlists.features import feature_flags
 
 
 class HomePageTest(TestCase):
@@ -36,6 +38,26 @@ class HomePageTest(TestCase):
         content = response.content.decode()
         self.assertIn('itemey 1', content)
         self.assertIn('itemey 2', content)
+
+
+class MultiUser_HomePageTest(TestCase):
+    def setUp(self):
+        self.multiple_lists_flag = feature_flags.multiple_lists
+        feature_flags.multiple_lists = True
+
+    def tearDown(self):
+        feature_flags.multiple_lists = self.multiple_lists_flag
+
+    def test_go_home_creates_new_list(self):
+        self.assertEqual(List.objects.count(), 0)
+        self.client.get('/')
+        self.assertEqual(List.objects.count(), 1)
+
+    def test_go_home_redirects_to_list_url(self):
+        response = self.client.get('/')
+        new_list_id = List.objects.first().id
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], f'/lists/{new_list_id}')
 
 
 class ItemModelTest(TestCase):
