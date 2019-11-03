@@ -109,6 +109,7 @@ class MultiUser_TodoListPageTest(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(Item.objects.count(), 0)
 
+
 class ItemModelTest(TestCase):
     def test_saving_and_retrieving_items(self):
         first_item = Item()
@@ -126,3 +127,14 @@ class ItemModelTest(TestCase):
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
         self.assertEqual(second_saved_item.text, 'Item the second')
+
+    def test_deleting_list_deletes_all_items(self):
+        todo_list = TodoList()
+        todo_list.save()
+        Item.objects.create(todo_list=todo_list, text='itemey 1')
+        Item.objects.create(todo_list=todo_list, text='itemey 2')
+        self.assertEqual(Item.objects.count(), 2)
+
+        todo_list.delete()
+
+        self.assertEqual(Item.objects.count(), 0)
