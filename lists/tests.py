@@ -88,6 +88,16 @@ class MultiUser_TodoListPageTest(TestCase):
         new_item = self.list.item_set.first()
         self.assertEqual(new_item.text, 'A new list item')
 
+    def test_redirects_after_adding_item_with_POST(self):
+        response = self.client.post(
+            f'/lists/{self.list.id}/add_item',
+            data={'item_text': 'A new list item'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], f'/lists/{self.list.id}')
+
+    # def test_sends_error_when_list_doesnt_exist(self):
+    #     self.fail('todo')
 
 class ItemModelTest(TestCase):
     def test_saving_and_retrieving_items(self):

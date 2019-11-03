@@ -29,4 +29,4 @@ def list_page(request, list_id):
 def add_item(request, list_id):
     todo_list = TodoList.objects.get(id=list_id)
     Item.objects.create(todo_list=todo_list, text=request.POST['item_text'])
-    return HttpResponse('ok')
+    return redirect('list', list_id=list_id)
