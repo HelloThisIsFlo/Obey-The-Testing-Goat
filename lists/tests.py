@@ -59,6 +59,7 @@ class MultiUser_HomePageTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], f'/lists/{new_list_id}')
 
+
 class MultiUser_ListPageTest(TestCase):
     def setUp(self):
         self.list = List()
@@ -68,6 +69,15 @@ class MultiUser_ListPageTest(TestCase):
         response = self.client.get(f'/lists/{self.list.id}')
         self.assertTemplateUsed(response, 'list.html')
 
+    def test_list_page_displays_list(self):
+        Item.objects.create(todo_list=self.list, text='itemey 1')
+        Item.objects.create(todo_list=self.list, text='itemey 2')
+
+        response = self.client.get(f'/lists/{self.list.id}')
+
+        content = response.content.decode()
+        self.assertIn('itemey 1', content)
+        self.assertIn('itemey 2', content)
 
 
 class ItemModelTest(TestCase):

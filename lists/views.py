@@ -20,4 +20,8 @@ def home_page(request):
 
 
 def list_page(request, id):
-    return render(request, 'list.html')
+    return render(
+        request,
+        'list.html',
+        {'list': List.objects.get(id=id)}
+    )
