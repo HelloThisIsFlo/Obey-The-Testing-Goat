@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 
 from lists.views import home_page
-from lists.models import Item, List
+from lists.models import Item, TodoList
 
 from superlists.features import feature_flags
 
@@ -49,25 +49,25 @@ class MultiUser_HomePageTest(TestCase):
         feature_flags.multiple_lists = self.multiple_lists_flag
 
     def test_go_home_creates_new_list(self):
-        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(TodoList.objects.count(), 0)
         self.client.get('/')
-        self.assertEqual(List.objects.count(), 1)
+        self.assertEqual(TodoList.objects.count(), 1)
 
     def test_go_home_redirects_to_list_url(self):
         response = self.client.get('/')
-        new_list_id = List.objects.first().id
+        new_list_id = TodoList.objects.first().id
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], f'/lists/{new_list_id}')
 
 
-class MultiUser_ListPageTest(TestCase):
+class MultiUser_TodoListPageTest(TestCase):
     def setUp(self):
-        self.list = List()
+        self.list = TodoList()
         self.list.save()
 
     def test_list_page_return_correct_template(self):
         response = self.client.get(f'/lists/{self.list.id}')
-        self.assertTemplateUsed(response, 'list.html')
+        self.assertTemplateUsed(response, 'todo_list.html')
 
     def test_list_page_displays_list(self):
         Item.objects.create(todo_list=self.list, text='itemey 1')
