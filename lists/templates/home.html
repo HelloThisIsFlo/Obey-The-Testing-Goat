@@ -4,7 +4,7 @@
   </head>
   <body>
     <h1>Your To-Do list</h1>
-    <form method="POST">
+    <form method="POST" action="/">
       {% csrf_token %}
       <input
         name="item_text"
