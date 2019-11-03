@@ -1,4 +1,5 @@
 class _Flags:
-    multiple_lists = False
+    pass
+
 
 feature_flags = _Flags()

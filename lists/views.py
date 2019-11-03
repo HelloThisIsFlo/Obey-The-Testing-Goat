@@ -7,16 +7,9 @@ from superlists.features import feature_flags
 
 
 def home_page(request):
-    if request.method == 'POST':
-        Item.objects.create(text=request.POST['item_text'])
-        return redirect('/')
-
-    if feature_flags.multiple_lists:
-        new_list = TodoList()
-        new_list.save()
-        return redirect(f'/lists/{new_list.id}')
-
-    return render(request, 'home.html', {'items': Item.objects.all()})
+    new_list = TodoList()
+    new_list.save()
+    return redirect(f'/lists/{new_list.id}')
 
 
 def list_page(request, list_id):
