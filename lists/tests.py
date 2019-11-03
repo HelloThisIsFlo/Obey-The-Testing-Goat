@@ -59,6 +59,16 @@ class MultiUser_HomePageTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], f'/lists/{new_list_id}')
 
+class MultiUser_ListPageTest(TestCase):
+    def setUp(self):
+        self.list = List()
+        self.list.save()
+
+    def test_list_page_return_correct_template(self):
+        response = self.client.get(f'/lists/{self.list.id}')
+        self.assertTemplateUsed(response, 'list.html')
+
+
 
 class ItemModelTest(TestCase):
     def test_saving_and_retrieving_items(self):

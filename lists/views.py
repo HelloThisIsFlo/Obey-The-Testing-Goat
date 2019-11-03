@@ -17,3 +17,7 @@ def home_page(request):
         return redirect(f'/lists/{new_list.id}')
 
     return render(request, 'home.html', {'items': Item.objects.all()})
+
+
+def list_page(request, id):
+    return render(request, 'list.html')
