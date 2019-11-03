@@ -19,9 +19,14 @@ def home_page(request):
     return render(request, 'home.html', {'items': Item.objects.all()})
 
 
-def list_page(request, id):
+def list_page(request, list_id):
     return render(
         request,
         'list.html',
-        {'list': List.objects.get(id=id)}
+        {'list': List.objects.get(id=list_id)}
     )
+
+def add_item(request, list_id):
+    todo_list = List.objects.get(id=list_id)
+    Item.objects.create(todo_list=todo_list, text=request.POST['item_text'])
+    return HttpResponse('ok')

@@ -79,6 +79,15 @@ class MultiUser_ListPageTest(TestCase):
         self.assertIn('itemey 1', content)
         self.assertIn('itemey 2', content)
 
+    def test_can_add_item_with_POST(self):
+        self.client.post(
+            f'/lists/{self.list.id}/add_item',
+            data={'item_text': 'A new list item'}
+        )
+        self.assertEqual(self.list.item_set.count(), 1)
+        new_item = self.list.item_set.first()
+        self.assertEqual(new_item.text, 'A new list item')
+
 
 class ItemModelTest(TestCase):
     def test_saving_and_retrieving_items(self):

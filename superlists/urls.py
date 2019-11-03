@@ -19,5 +19,6 @@ from lists import views
 
 urlpatterns = [
     url(r'^$', views.home_page, name='home'),
-    url(r'^lists/(?P<id>\d+)$', views.list_page, name='list'),
+    url(r'^lists/(?P<list_id>\d+)$', views.list_page, name='list'),
+    url(r'^lists/(?P<list_id>\d+)/add_item$', views.add_item, name='add_item'),
 ]
