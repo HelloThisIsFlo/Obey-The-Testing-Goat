@@ -96,8 +96,18 @@ class MultiUser_TodoListPageTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], f'/lists/{self.list.id}')
 
-    # def test_sends_error_when_list_doesnt_exist(self):
-    #     self.fail('todo')
+    def test_return_404_when_trying_to_display_nonexisting_list(self):
+        nonexisting_list_id = 12345
+        response = self.client.get(f'/lists/{nonexisting_list_id}')
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_return_404_when_trying_to_add_item_to_nonexisting_list(self):
+        nonexisting_list_id = 12345
+        response = self.client.get(f'/lists/{nonexisting_list_id}/add_item')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(Item.objects.count(), 0)
 
 class ItemModelTest(TestCase):
     def test_saving_and_retrieving_items(self):

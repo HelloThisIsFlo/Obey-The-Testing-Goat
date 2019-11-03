@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from textwrap import dedent
 
@@ -23,10 +23,11 @@ def list_page(request, list_id):
     return render(
         request,
         'todo_list.html',
-        {'todo_list': TodoList.objects.get(id=list_id)}
+        {'todo_list': get_object_or_404(TodoList, id=list_id)}
     )
 
+
 def add_item(request, list_id):
-    todo_list = TodoList.objects.get(id=list_id)
+    todo_list = get_object_or_404(TodoList, id=list_id)
     Item.objects.create(todo_list=todo_list, text=request.POST['item_text'])
     return redirect('list', list_id=list_id)
