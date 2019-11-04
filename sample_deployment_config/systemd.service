@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn server for goat-staging.ddns.net
+
+[Service]
+Restart=on-failure
+User=floriank
+WorkingDirectory=/home/floriank/sites/goat-staging.ddns.net
+EnvironmentFile=/home/floriank/sites/goat-staging.ddns.net/.env
+
+ExecStart=/home/floriank/.local/share/virtualenvs/goat-staging.ddns.net-1KJo9bu7/bin/gunicorn \
+    --bind unix:/tmp/goat-staging.ddns.net.socket \
+    superlists.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
