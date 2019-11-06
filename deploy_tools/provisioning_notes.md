@@ -24,7 +24,7 @@
 
   ```bash
   cat ./deploy_tools/nginx.template.conf \
-  | sed 's/DOMAIN/goat-production.ddns.net/g' \
+  | sed 's/DOMAIN/goat-staging.ddns.net/g' \
   | sudo tee /etc/nginx/sites-available/goat-staging.ddns.net
   ```
 
@@ -51,6 +51,7 @@
   ```
 
 ## Restart/Reload everything
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl reload nginx
