@@ -4,6 +4,7 @@ Description=Gunicorn server for DOMAIN
 [Service]
 Restart=on-failure
 User=floriank
+WorkingDirectory=/home/floriank/sites/DOMAIN
 EnvironmentFile=/home/floriank/sites/DOMAIN/.env
 
 ExecStart=GUNICORN \

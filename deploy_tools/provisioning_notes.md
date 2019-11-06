@@ -46,9 +46,17 @@
 
   cat ./deploy_tools/gunicorn-systemd.template.service  \
   | sed 's/DOMAIN/goat-staging.ddns.net/g' \
-  | sed "s|GUNICORN|/home/floriank/.local/share/virtualenvs/goat-staging.ddns.net-NBSdPYK6/bin/gunicorn|g" \
+  | sed "s|GUNICORN|/home/floriank/.local/share/virtualenvs/goat-staging.ddns.net-1KJo9bu7/bin/gunicorn|g" \
   | sudo tee /etc/systemd/system/gunicorn-goat-staging.ddns.net.service
   ```
+
+## Restart/Reload everything
+```bash
+sudo systemctl daemon-reload
+sudo systemctl reload nginx
+sudo systemctl enable gunicorn-goat-staging.ddns.net.service
+sudo systemctl start gunicorn-goat-staging.ddns.net.service
+```
 
 ## Folder structure
 
