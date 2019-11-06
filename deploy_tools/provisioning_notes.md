@@ -2,10 +2,12 @@
 
 ## Required packages:
 
+```
 - nginx
 - Python 3.6
 - Pip & Pipenv
 - Git
+```
 
 ### On Ubuntu
 
@@ -17,22 +19,47 @@
 
 ## NginX Virtual Host config
 
-- see `nginx.template.conf`
-- replace DOMAIN with `goat-staging.ddns.net` (for example)
+- See `nginx.template.conf`
+- Replace DOMAIN with `goat-staging.ddns.net` (for example) and copy to `/etc/nginx/sites-available/goat-staging.ddns.net`
+
+  ```bash
+  cat ./deploy_tools/nginx.template.conf \
+  | sed 's/DOMAIN/goat-production.ddns.net/g' \
+  | sudo tee /etc/nginx/sites-available/goat-staging.ddns.net
+  ```
+
+- Enable site by creating symlink
+
+  ```bash
+  cd /etc/nginx/sites-enabled
+  sudo ln -s /etc/nginx/sites-available/goat-staging.ddns.net goat-staging.ddns.net
+  ```
 
 ## Systemd service
 
-- see `gunicornd-systemd.template.service`
-- replace DOMAIN with `goat-staging.ddns.net`
+- See `gunicornd-systemd.template.service`
+- Replace DOMAIN with `goat-staging.ddns.net` (for example) and copy to `/etc/systemd/system/gunicorn-goat-staging.ddns.net.service`
+
+  ```bash
+  # Get the location of 'gunicorn' with 'pipenv run which gunicorn'
+  # and update in second 'sed' command
+
+  cat ./deploy_tools/gunicorn-systemd.template.service  \
+  | sed 's/DOMAIN/goat-staging.ddns.net/g' \
+  | sed "s|GUNICORN|/home/floriank/.local/share/virtualenvs/goat-staging.ddns.net-NBSdPYK6/bin/gunicorn|g" \
+  | sudo tee /etc/systemd/system/gunicorn-goat-staging.ddns.net.service
+  ```
 
 ## Folder structure
 
 Assume we have a user account at /home/USERNAME
 
+```
 /home/USERNAME
 └── sites
 │   ├── DOMAIN1
-│   │   └──...
+│   │ └──...
 │   ├── DOMAIN2
-│   │   └──...
+│   │ └──...
 ...
+```

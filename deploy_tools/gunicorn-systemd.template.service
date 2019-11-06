@@ -6,7 +6,7 @@ Restart=on-failure
 User=floriank
 EnvironmentFile=/home/floriank/sites/DOMAIN/.env
 
-ExecStart=/home/floriank/.local/share/virtualenvs/DOMAIN-1KJo9bu7/bin/gunicorn \
+ExecStart=GUNICORN \
     --bind unix:/tmp/DOMAIN.socket \
     superlists.wsgi:application
 
