@@ -3,7 +3,7 @@
 [x] Display multiple items in the table
 [x] Clean up after FT runs
 [x] Remove `time.sleep` in FT
-[ ] Allow multiple lists for multiple users
+[x] Allow multiple lists for multiple users
 
 [x] Support more than one list
   [x] Adjust model so that items are associated with different lists
