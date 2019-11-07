@@ -11,3 +11,5 @@
   [x] Add a URL for creating a new list via POST
   [x] Add URLs for adding a new item to an existing list via POST
   [x] Refactor away some duplication in `urls.py`
+
+[ ] Remove hardcoded URLs from `views.py`

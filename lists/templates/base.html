@@ -6,8 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To-Do lists</title>
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+    />
+    <link rel="stylesheet" href="{% static 'base.css' %}" />
   </head>
   <body>
     <div class="container">
@@ -23,6 +26,11 @@
                 placeholder="Enter a to-do item"
                 class="form-control input-lg"
               />
+              {% if error %}
+              <div class="form-group has-error">
+                <span class="help-block">{{ error }}</span>
+              </div>
+              {% endif %}
             </form>
           </div>
         </div>
