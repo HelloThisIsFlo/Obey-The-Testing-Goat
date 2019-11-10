@@ -14,4 +14,4 @@
 
 [x] Remove hardcoded URLs from `views.py`
 [x] Remove hardcoded URLs from `list.html` & `home.html`
-[ ] Remove duplication of validation logic in views
+[x] Remove duplication of validation logic in views
