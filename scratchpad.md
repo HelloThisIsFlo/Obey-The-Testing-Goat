@@ -12,6 +12,6 @@
   [x] Add URLs for adding a new item to an existing list via POST
   [x] Refactor away some duplication in `urls.py`
 
-[ ] Remove hardcoded URLs from `views.py`
+[x] Remove hardcoded URLs from `views.py`
 [x] Remove hardcoded URLs from `list.html` & `home.html`
 [ ] Remove duplication of validation logic in views
