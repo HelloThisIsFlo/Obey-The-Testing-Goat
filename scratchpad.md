@@ -13,3 +13,4 @@
   [x] Refactor away some duplication in `urls.py`
 
 [ ] Remove hardcoded URLs from `views.py`
+[ ] Remove hardcoded URLs from `list.html` & `home.html`
