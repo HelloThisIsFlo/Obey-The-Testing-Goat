@@ -1,6 +1,6 @@
 import random
 from fabric.contrib.files import append, exists
-from fabric.api import cd, env, local, run
+from fabric.api import cd, env, local, run, sudo
 
 REPO_URL = 'git@github.com:FlorianKempenich/Obey-The-Testing-Goat.git'
 
@@ -9,6 +9,7 @@ def deploy():
     # # 'env.host' is the address of the server specified when
     # # using the cli
     site_folder = f'/home/{env.user}/sites/{env.host}'
+    _prompt_for_sudo_password()
     run(f'mkdir -p {site_folder}')
     with cd(site_folder):
         _get_latest_source()
@@ -16,7 +17,11 @@ def deploy():
         _create_or_update_dotenv()
         _update_static_files()
         _update_database()
+    _restart_service()
 
+
+def _prompt_for_sudo_password():
+    sudo('echo "Sudo password ok"')
 
 def _get_latest_source():
     if exists('.git'):
@@ -51,3 +56,6 @@ def _update_static_files():
 
 def _update_database():
     run('pipenv run python manage.py migrate --noinput')
+
+def _restart_service():
+    sudo(f'systemctl restart gunicorn-{env.host}')
