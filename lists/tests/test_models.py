@@ -65,3 +65,17 @@ class ListAndItemModelTest(TestCase):
     def test_get_absolute_url(self):
         list_ = List.objects.create()
         self.assertEqual(list_.get_absolute_url(), f'/lists/{list_.id}/')
+
+    def test_list_ordering(self):
+        list_ = List.objects.create()
+        item1 = Item.objects.create(list=list_, text='i1')
+        item2 = Item.objects.create(list=list_, text='i2')
+        item3 = Item.objects.create(list=list_, text='i3')
+        self.assertEqual(
+            list(Item.objects.all()),
+            [item1, item2, item3]
+        )
+
+    def test_string_representation(self):
+        item = Item(text='some text')
+        self.assertEqual(str(item), 'some text')
