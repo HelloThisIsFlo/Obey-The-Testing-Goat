@@ -1,6 +1,9 @@
 window.Superlists = {};
 window.Superlists.initialize = function() {
-  $('input[name="text"]').on("keypress", function() {
+  function hideError() {
     $(".has-error").hide();
-  });
+  }
+
+  $('input[name="text"]').on("keypress", hideError);
+  $('input[name="text"]').on("click", hideError);
 };
