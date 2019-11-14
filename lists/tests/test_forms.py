@@ -22,10 +22,11 @@ class ItemFormTest(TestCase):
 
     def test_form_validation_for_blank_items(self):
         list_ = List.objects.create()
-        form = ItemForm(data={'text': ''})
+        item = Item(list=list_)
+        form = ItemForm(instance=item, data={'text': ''})
 
         with self.assertRaises(ValueError):
-            form.custom_save(for_list=list_)
+            form.save()
 
         self.assertFalse(form.is_valid())
         self.assertEqual(
@@ -35,8 +36,10 @@ class ItemFormTest(TestCase):
 
     def test_form_save_handles_saving_to_a_list(self):
         list_ = List.objects.create()
-        form = ItemForm({'text': 'hello'})
-        new_item = form.custom_save(for_list=list_)
+        item = Item(list=list_)
+        form = ItemForm(instance=item, data={'text': 'hello'})
+
+        new_item = form.save()
         self.assertEqual(new_item, Item.objects.first())
         self.assertEqual(new_item.text, 'hello')
         self.assertEqual(new_item.list, list_)
