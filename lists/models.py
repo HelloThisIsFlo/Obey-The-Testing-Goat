@@ -17,3 +17,9 @@ class Item(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Article(models.Model):
+    title = models.CharField(max_length=15)
+    author = models.CharField(max_length=15)
+    pub_date = models.DateTimeField()
