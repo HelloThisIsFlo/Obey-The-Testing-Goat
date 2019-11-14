@@ -25,12 +25,12 @@ def view_list(request, list_id):
 
 
 def new_list(request):
-    item = Item()
+    list_ = List.objects.create()
+    item = Item(list=list_)
     form = ItemForm(instance=item, data=request.POST)
     if form.is_valid():
-        list_ = List.objects.create()
-        item.list = list_
         form.save()
         return redirect(list_)
     else:
+        list_.delete()
         return render(request, 'home.html', {'form': form})

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lists.forms import EMPTY_ITEM_ERROR, ItemForm
+from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm
 from lists.models import List, Item
 
 # My understanding of forms so far
@@ -43,3 +43,13 @@ class ItemFormTest(TestCase):
         self.assertEqual(new_item, Item.objects.first())
         self.assertEqual(new_item.text, 'hello')
         self.assertEqual(new_item.list, list_)
+
+    def test_form_validation_for_duplicate_items(self):
+        list_ = List.objects.create()
+        Item.objects.create(list=list_, text='duplicate')
+
+        item = Item(list=list_)
+        form = ItemForm(instance=item, data={'text': 'duplicate'})
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])
