@@ -6,7 +6,7 @@ from django.utils.html import escape
 
 from lists.views import home_page
 from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 
 
 class HomePageTest(TestCase):
@@ -97,6 +97,15 @@ class ListViewTest(TestCase):
     def test_for_invalid_input_shows_error_on_page(self):
         response = self.post_invalid_input()
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
+
+    def test_for_duplicate_item_shows_error_on_page(self):
+        list_ = List.objects.create()
+        Item.objects.create(list=list_, text='duplicate')
+        response = self.client.post(
+            f'/lists/{list_.id}/',
+            data={'text': 'duplicate'}
+        )
+        self.assertContains(response, escape(DUPLICATE_ITEM_ERROR))
 
     def test_displays_item_form(self):
         list_ = List.objects.create()
