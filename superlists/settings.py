@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     # Project
     'lists',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -128,5 +129,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 # Email
-
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Auth
+AUTH_USER_MODEL = 'accounts.ListUser'
+AUTHENTICATION_BACKENDS = [
+    'accounts.authentication.PasswordlessAuthenticationBackend'
+]
