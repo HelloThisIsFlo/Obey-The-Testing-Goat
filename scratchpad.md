@@ -15,3 +15,5 @@
 [x] Remove hardcoded URLs from `views.py`
 [x] Remove hardcoded URLs from `list.html` & `home.html`
 [x] Remove duplication of validation logic in views
+
+[ ] Make 'uid' in Token non-editable
