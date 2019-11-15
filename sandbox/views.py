@@ -1,17 +1,48 @@
 from django.shortcuts import render, HttpResponse, redirect
+import uuid
+
+session_template = {
+    'logged_in': False,
+    'email': 'frank@frank.com',
+    'login_token': 'asdfasdf134dsfasdf'
+}
 
 
 def main(request):
-    if request.method == 'POST':
-        request.session['email'] = request.POST['email']
-        return redirect('sandbox_main')
-
-    if 'email' in request.session:
-        data = {'email': request.session['email']}
+    if request.session.get('logged_in', False) is True:
+        return render(request, 'sandbox/private.html', {'session': request.session})
     else:
-        data = {}
+        return redirect('sandbox_login')
 
-    return render(request, 'sandbox/main.html', data)
+
+def login(request):
+    print(request)
+    email_sent = False
+
+    if request.method == 'POST':
+        email = request.POST['email']
+        code = uuid.uuid4().hex
+        request.session['email'] = email
+        request.session['code'] = code
+        send_email(email, code)
+        email_sent = True
+
+    else:
+        def auth_link_valid():
+            if 'email' not in request.session or 'code' not in request.session:
+                return False
+
+            link_email = request.GET.get('email', '')
+            link_code = request.GET.get('code', '')
+            session_email = request.session['email']
+            session_code = request.session['code']
+            return link_email == session_email and link_code == session_code
+
+        if auth_link_valid():
+            request.session['logged_in'] = True
+            return redirect('sandbox_main')
+
+    return render(request, 'sandbox/login.html', {'email_sent': email_sent})
 
 
 def send_email(email, code):
