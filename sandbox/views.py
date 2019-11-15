@@ -7,9 +7,13 @@ session_template = {
     'login_token': 'asdfasdf134dsfasdf'
 }
 
+CODE_EXPIRATION = 15
+SESSION_EXPIRATION = 60
+
 
 def main(request):
     if request.session.get('logged_in', False) is True:
+        print(request.session.get_expiry_date())
         return render(request, 'sandbox/private.html', {'session': request.session})
     else:
         return redirect('sandbox_login')
@@ -24,6 +28,7 @@ def login(request):
         code = uuid.uuid4().hex
         request.session['email'] = email
         request.session['code'] = code
+        request.session.set_expiry(CODE_EXPIRATION)
         send_email(email, code)
         email_sent = True
 
@@ -40,6 +45,7 @@ def login(request):
 
         if auth_link_valid():
             request.session['logged_in'] = True
+            request.session.set_expiry(SESSION_EXPIRATION)
             return redirect('sandbox_main')
 
     return render(request, 'sandbox/login.html', {'email_sent': email_sent})
@@ -48,3 +54,4 @@ def login(request):
 def send_email(email, code):
     print(
         f'Go to http://localhost:8000/sandbox/login?email={email}&code={code}')
+    print(f'Warning the code is only valid for {CODE_EXPIRATION} seconds!')
