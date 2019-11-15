@@ -14,13 +14,26 @@
   </head>
   <body>
     <div class="container">
+      <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+          <a href="/" class="navbar-brand">Superlists</a>
+          <form action="#" method="POST" class="navbar-form navbar-right">
+            {% csrf_token %}
+            <label for="email">Enter email to log in:</label>
+            <input type="text" name="email" id="email" />
+          </form>
+        </div>
+      </nav>
+
       <div class="row">
         <div class="col-md-6 col-md-offset-3 jumbotron">
           <div class="text-center">
             <h1>{% block header_text %}{% endblock %}</h1>
             <form method="POST" action="{% block form_action %}{% endblock %}">
               {% csrf_token %}
-              {{ form.text }} <!-- This renders the HTML input for the 'text' field of 'Item' -->
+              <!-- This renders the HTML input for the 'text' field of 'Item' -->
+              {{ form.text }}
+              <!-- This renders the HTML input for the 'text' field of 'Item' -->
               {% if form.errors %}
               <div class="form-group has-error">
                 <span class="help-block">{{ form.text.errors }}</span>
