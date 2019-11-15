@@ -15,7 +15,12 @@
     <p>You are logged in <em>{{ user.first_name }} {{ user.last_name }}</em></p>
     <a href="{% url 'sandbox_logout' %}">Logout</a>
     {% else %}
-    <form action="{% url 'sandbox_login' %}" method="post">
+
+    {% if next %}
+      <form action="{% url 'sandbox_login' %}?next={{ next }}" method="post">
+    {% else %}
+      <form action="{% url 'sandbox_login' %}" method="post">
+    {% endif %}
       {% csrf_token %}
       <div>
         <label for="username">Username:</label>
@@ -28,5 +33,7 @@
       <input type="submit" value="Login" />
     </form>
     {% endif %}
+
+    <a href="{% url 'sandbox_private' %}">Private page</a>
   </body>
 </html>
