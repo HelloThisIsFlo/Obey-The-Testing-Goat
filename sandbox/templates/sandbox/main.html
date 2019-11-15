@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Sandbox</title>
+  </head>
+  <body>
+    <p>
+      Main Page Sandbox
+    </p>
+
+    {% if user.is_authenticated %}
+    <p>You are logged in <em>{{ user.first_name }} {{ user.last_name }}</em></p>
+    <a href="{% url 'sandbox_logout' %}">Logout</a>
+    {% else %}
+    <form action="{% url 'sandbox_login' %}" method="post">
+      {% csrf_token %}
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" />
+      </div>
+      <div>
+        <label for="pass">Password:</label>
+        <input type="password" name="pass" id="pass" />
+      </div>
+      <input type="submit" value="Login" />
+    </form>
+    {% endif %}
+  </body>
+</html>
