@@ -41,3 +41,38 @@ class SendLoginEmailViewTest(TestCase):
         self.assertEqual(mail_sent.subject, 'Your login link for Superlists')
         self.assertEqual(mail_sent.from_email, 'noreply@superlists')
         self.assertEqual(mail_sent.to, ['edith@example.com'])
+
+    def test_adds_success_message(self):
+        # # 'follow=True' tells the client to get the page it was redirected to.
+        response = self.client.post('/accounts/send_login_email', data={
+            'email': 'edith@example.com'
+        }, follow=True)
+
+        message = list(response.context['messages'])[0]
+        self.assertEqual(
+            message.message,
+            "Check your email, we've sent you a link you can use to log in."
+        )
+        self.assertEqual(message.tags, "success")
+
+    @patch('accounts.views.messages')
+    def test_adds_success_message_with_mocks(self, mock_messages):
+        # # This is an example where testing w/ mocks can leave us coupled to the
+        # # implementation.
+        # # This test enforces that we use the shortcut method: 'messages.success'
+        # # If we tried to send the message with 'messages.add_message(.., messages.SUCCESS, ..)
+        # # while the code would work as expected, the test would fail.
+        # # The above test, without mocks, does not have this problem.
+        # # However, sometimes getting something like the version above to work in the first
+        # # place is such a hassle that using mocks remains the pragmatic choice.
+        response = self.client.post('/accounts/send_login_email', data={
+            'email': 'edith@example.com'
+        })
+
+        mock_messages.success.assert_called_once()
+        ((_request, msg_sent), _kwargs) = mock_messages.success.call_args
+
+        self.assertEqual(
+            msg_sent,
+            "Check your email, we've sent you a link you can use to log in."
+        )
