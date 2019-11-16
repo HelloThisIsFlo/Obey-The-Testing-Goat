@@ -1,6 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib import auth
 from uuid import uuid4
+
+auth.signals.user_logged_in.disconnect(auth.models.update_last_login)
 
 
 class User(models.Model):
@@ -8,7 +10,7 @@ class User(models.Model):
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
     is_anonymous = False
-    is_authenticated = False
+    is_authenticated = True
 
 
 class Token(models.Model):

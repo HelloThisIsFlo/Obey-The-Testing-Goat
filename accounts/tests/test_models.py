@@ -1,5 +1,5 @@
-from django.test import TestCase
-from django.contrib.auth import get_user_model
+from django.test import TestCase, RequestFactory
+from django.contrib.auth import get_user_model, login as auth_login
 from accounts.models import Token
 
 # # Ensures we correctly registered our model with the
@@ -20,6 +20,11 @@ class UserModelTest(TestCase):
             User.objects.get(pk='a@b.com'),
             user
         )
+
+    def test_no_problem_with_auth_login(self):
+        user = User(email='edith@example.com')
+        request = self.client.request().wsgi_request
+        auth_login(request, user) # should not raise
 
 
 class TokenModelTest(TestCase):
