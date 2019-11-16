@@ -14,7 +14,7 @@ def home_page(request):
 def view_list(request, list_id):
     list_ = List.objects.get(id=list_id)
     item = Item(list=list_)
-    form = ItemForm(instance=item)
+    form = ItemForm()
     if request.method == 'POST':
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
