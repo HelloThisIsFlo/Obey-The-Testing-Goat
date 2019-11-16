@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from unittest.mock import patch
 from unittest.mock import ANY
 import accounts.views
-from accounts.models import Token
+from accounts.models import Token, User
 
 
 class SendLoginEmailViewTest(TestCase):
@@ -97,7 +97,31 @@ class SendLoginEmailViewTest(TestCase):
         self.assertIn(expected_url, mail_sent.body)
 
 
+@patch('accounts.views.auth')
 class LoginViewTest(TestCase):
-    def test_redirects_to_home_page(self):
+    def test_redirects_to_home_page(self, _mock_auth):
         response = self.client.get('/accounts/login?token=abcd1234')
         self.assertRedirects(response, '/')
+
+    def test_calls_authenticate_with_uid_from_get_request(self, mock_auth):
+        user = User.objects.create(email='edith@example.com')
+        mock_auth.authenticate.return_value = user
+
+        self.client.get('/accounts/login?token=abcd1234')
+
+        mock_auth.authenticate.assert_called_with(uid='abcd1234')
+
+    def test_logs_in_when_authentication_sucessful(self, mock_auth):
+        user = User.objects.create(email='edith@example.com')
+        mock_auth.authenticate.return_value = user
+
+        response = self.client.get('/accounts/login?token=abcd1234')
+
+        mock_auth.login.assert_called_with(response.wsgi_request, user)
+
+    def test_does_not_log_in_when_authentication_sucessful(self, mock_auth):
+        mock_auth.authenticate.return_value = None
+
+        self.client.get('/accounts/login?token=abcd1234')
+
+        mock_auth.login.assert_not_called()
