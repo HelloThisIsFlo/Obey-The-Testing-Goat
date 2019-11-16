@@ -4,6 +4,9 @@ Submit there: https://github.com/hjwp/Book-TDD-Web-Dev-Python/issues
 
 
 ## ch17|005
+> ### Deprecated
+> While this problem is relevant, it is addressed a couple of paragraphs later when replacing
+> this test with '@patch' from the 'mock' module
 
 In `test_sends_mail_to_address_from_post` when we're doing
 ```python

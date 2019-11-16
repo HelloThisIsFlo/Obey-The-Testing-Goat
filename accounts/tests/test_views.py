@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from unittest.mock import patch
 from unittest.mock import ANY
 import accounts.views
+from accounts.models import Token
 
 
 class SendLoginEmailViewTest(TestCase):
@@ -76,6 +77,24 @@ class SendLoginEmailViewTest(TestCase):
             msg_sent,
             "Check your email, we've sent you a link you can use to log in."
         )
+
+    def test_creates_token_associated_with_email(self):
+        self.client.post('/accounts/send_login_email', data={
+            'email': 'edith@example.com'
+        })
+        self.assertEqual(Token.objects.count(), 1)
+        token = Token.objects.first()
+        self.assertEqual(token.email, 'edith@example.com')
+
+    def test_sends_link_to_login_using_token_uid(self):
+        self.client.post('/accounts/send_login_email', data={
+            'email': 'edith@example.com'
+        })
+        token = Token.objects.first()
+        mail_sent = mail.outbox[0]
+
+        expected_url = f'http://testserver/accounts/login?token={token.uid}'
+        self.assertIn(expected_url, mail_sent.body)
 
 
 class LoginViewTest(TestCase):
