@@ -17,3 +17,4 @@
 [x] Remove duplication of validation logic in views
 
 [ ] Make 'uid' in Token non-editable
+[ ] Clean up `wait_for` stuff in `base.py`
