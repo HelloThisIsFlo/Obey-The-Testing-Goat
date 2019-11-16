@@ -76,3 +76,9 @@ class SendLoginEmailViewTest(TestCase):
             msg_sent,
             "Check your email, we've sent you a link you can use to log in."
         )
+
+
+class LoginViewTest(TestCase):
+    def test_redirects_to_home_page(self):
+        response = self.client.get('/accounts/login?token=abcd1234')
+        self.assertRedirects(response, '/')
