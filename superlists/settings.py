@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Project
     'lists',
     'accounts',
+    'functional_tests'
 ]
 
 MIDDLEWARE = [
