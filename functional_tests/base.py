@@ -1,3 +1,4 @@
+from functools import wraps
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
@@ -5,6 +6,21 @@ import time
 import os
 
 MAX_WAIT = 10
+
+
+def wait(assertion_fn):
+    @wraps(assertion_fn)
+    def decorated(*args, **kwargs):
+        start_time = time.time()
+        while True:
+            try:
+                return assertion_fn(*args, **kwargs)
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time >= MAX_WAIT:
+                    raise e
+                time.sleep(0.1)
+
+    return decorated
 
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -17,37 +33,27 @@ class FunctionalTest(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    def wait_for(self, assertion_fn):
-        start_time = time.time()
-        while True:
-            try:
-                return assertion_fn()
-            except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time >= MAX_WAIT:
-                    raise e
-                time.sleep(0.1)
-
-    def wait_for_row_in_list_table(self, row_text):
-        def assert_row_in_list_table():
-            table = self.browser.find_element_by_id('id_list_table')
-            rows = table.find_elements_by_tag_name('tr')
-            self.assertIn(row_text, [row.text for row in rows])
-
-        self.wait_for(assert_row_in_list_table)
-
     def get_item_input_box(self):
         return self.browser.find_element_by_id('id_text')
 
+    @wait
+    def wait_for(self, assertion_fn):
+        return assertion_fn()
+
+    @wait
+    def wait_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
+    @wait
     def wait_to_be_logged_in(self, email):
-        self.wait_for(
-            lambda: self.browser.find_element_by_link_text('Log out')
-        )
+        self.browser.find_element_by_link_text('Log out')
         navbar = self.browser.find_element_by_css_selector('.navbar')
         self.assertIn(email, navbar.text)
 
+    @wait
     def wait_to_be_logged_out(self, email):
-        self.wait_for(
-            lambda: self.browser.find_element_by_name('email')
-        )
+        self.browser.find_element_by_name('email')
         navbar = self.browser.find_element_by_css_selector('.navbar')
         self.assertNotIn(email, navbar.text)
