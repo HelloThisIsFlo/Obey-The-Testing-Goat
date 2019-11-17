@@ -1,6 +1,7 @@
 import random
 from fabric.contrib.files import append, exists
 from fabric.api import cd, env, local, run, sudo
+import os
 
 REPO_URL = 'git@github.com:FlorianKempenich/Obey-The-Testing-Goat.git'
 
@@ -47,6 +48,7 @@ def _create_or_update_dotenv():
 
     append('.env', 'DJANGO_DEBUG_FALSE=y')
     append('.env', f'SITENAME={env.host}')
+    append('.env', f"SENDGRID_API_KEY={os.environ['SENDGRID_API_KEY']}")
     append_secret_key()
 
 
