@@ -65,11 +65,12 @@ class LoginTest(FunctionalTest):
 
         email_id = None
         start = time.time()
-        inbox = poplib.POP3_SSL('pop.gmail.com')
         try:
-            inbox.user(test_email)
-            inbox.pass_(os.environ['GMAIL_PASSWORD'])
             while time.time() - start < 60:
+                inbox = poplib.POP3_SSL('pop.gmail.com')
+                inbox.user(test_email)
+                inbox.pass_(os.environ['GMAIL_PASSWORD'])
+
                 # Get 10 newest messages
                 count, _ = inbox.stat()
                 for i in reversed(range(max(1, count - 10), count + 1)):
@@ -79,6 +80,7 @@ class LoginTest(FunctionalTest):
                         email_id = i
                         body = '\n'.join(lines)
                         return body
+                inbox.quit()
                 time.sleep(5)
         finally:
             if email_id:
