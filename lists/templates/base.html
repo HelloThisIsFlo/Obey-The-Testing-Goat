@@ -18,6 +18,9 @@
         <div class="container-fluid">
           <a href="/" class="navbar-brand">Superlists</a>
           {% if user.is_authenticated %}
+          <ul class="nav navbar-nav navbar-left">
+            <li><a href="{% url 'my_lists' user.email %}">My lists</a></li>
+          </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="navbar-text">Logged in as {{ user.email }}</li>
             <li><a href="{% url 'logout' %}">Log out</a></li>
@@ -38,7 +41,7 @@
 
       {% if messages %}
       <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-8 col-md-offset-2">
           {% for message in messages %}
           <!---->
           {% if message.level_tag == 'success' %}
@@ -56,6 +59,7 @@
         <div class="col-md-6 col-md-offset-3 jumbotron">
           <div class="text-center">
             <h1>{% block header_text %}{% endblock %}</h1>
+            {% block list_form %}
             <form method="POST" action="{% block form_action %}{% endblock %}">
               {% csrf_token %}
               <!-- This renders the HTML input for the 'text' field of 'Item' -->
@@ -67,6 +71,7 @@
               </div>
               {% endif %}
             </form>
+            {% endblock %}
           </div>
         </div>
       </div>
@@ -74,6 +79,11 @@
       <div class="row">
         <div class="col-md-6 col-md-offset-3">
           {% block table %}{% endblock %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          {% block extra_content %}{% endblock %}
         </div>
       </div>
     </div>
