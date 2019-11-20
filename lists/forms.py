@@ -6,7 +6,7 @@ EMPTY_ITEM_ERROR = "You can't have an empty list item"
 DUPLICATE_ITEM_ERROR = "You've already got this in your list"
 
 
-class ItemForm(forms.models.ModelForm):
+class BaseItemForm(forms.models.ModelForm):
     class Meta:
         model = Item
         fields = ('text',)
@@ -20,6 +20,8 @@ class ItemForm(forms.models.ModelForm):
             'text': {'required': EMPTY_ITEM_ERROR}
         }
 
+
+class ExistingListItemForm(BaseItemForm):
     def __init__(self, for_list, data=None):
         super().__init__(data=data)
         self.instance.list = for_list
@@ -35,20 +37,7 @@ class ItemForm(forms.models.ModelForm):
         return super().clean()
 
 
-class NewListForm(forms.models.ModelForm):
-    class Meta:
-        model = Item
-        fields = ('text',)
-        widgets = {
-            'text': forms.fields.TextInput(attrs={
-                'placeholder': 'Enter a to-do item',
-                'class': 'form-control input-lg',
-            })
-        }
-        error_messages = {
-            'text': {'required': EMPTY_ITEM_ERROR}
-        }
-
+class NewListForm(BaseItemForm):
     def __init__(self, owner=None, data=None):
         super().__init__(data=data)
         self.owner = owner

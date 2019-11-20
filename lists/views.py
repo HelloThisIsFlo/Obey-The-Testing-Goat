@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from textwrap import dedent
 
 from lists.models import Item, List
-from lists.forms import ItemForm, NewListForm
+from lists.forms import ExistingListItemForm, NewListForm
 User = get_user_model()
 
 
@@ -16,9 +16,9 @@ def home_page(request):
 
 def view_list(request, list_id):
     list_ = List.objects.get(id=list_id)
-    form = ItemForm(for_list=list_)
+    form = ExistingListItemForm(for_list=list_)
     if request.method == 'POST':
-        form = ItemForm(for_list=list_, data=request.POST)
+        form = ExistingListItemForm(for_list=list_, data=request.POST)
         if form.is_valid():
             form.save()
             return redirect(list_)
@@ -31,7 +31,7 @@ def new_list(request):
     if request.user.is_authenticated:
         list_.owner = request.user
     list_.save()
-    form = ItemForm(for_list=list_, data=request.POST)
+    form = ExistingListItemForm(for_list=list_, data=request.POST)
     if form.is_valid():
         form.save()
         return redirect(list_)
