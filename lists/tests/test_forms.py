@@ -1,6 +1,10 @@
+import unittest
+from unittest.mock import patch, Mock
+from unittest import skip
 from django.test import TestCase
-from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm
+from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm, NewListForm
 from lists.models import List, Item
+
 
 # My understanding of forms so far
 # --------------------------------
@@ -53,3 +57,65 @@ class ItemFormTest(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])
+
+
+class NewListFormTest(unittest.TestCase):
+    @skip("""
+    This is an example of how to NOT write a test with Mocks, instead
+    simplify the interface to test we have the one. . . we wish we had.
+    """)
+    @patch('lists.forms.List')
+    @patch('lists.forms.Item')
+    def test_save_creates_new_list_and_item_from_post_data(self, MockItem, MockList):
+        mock_list = MockList()
+        mock_item = MockItem()
+
+        user = Mock()
+
+        form = NewListForm(owner=user, data={'text': 'new item text'})
+        form.is_valid()  # Call to populate 'cleaned_data'
+
+        def assert_item_saved_with_correct_values():
+            self.assertEqual(mock_item.text, 'new item text')
+            self.assertEqual(mock_item.owner, user)
+            self.assertEqual(mock_item.list, mock_list)
+            mock_list.save.assert_called_once()
+        mock_item.save.side_effect = assert_item_saved_with_correct_values
+
+        form.save()
+        mock_item.save.assert_called_once()
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_from_post_data_if_user_not_authenticated(
+        self, mock_List_create_new
+    ):
+        user = Mock(is_authenticated=False)
+        form = NewListForm(owner=user, data={'text': 'new item text'})
+        form.is_valid()
+        form.save()
+        mock_List_create_new.assert_called_once_with(
+            first_item_text='new item text'
+        )
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_from_post_data_if_user_authenticated(
+        self, mock_List_create_new
+    ):
+        user = Mock(is_authenticated=True)
+        form = NewListForm(owner=user, data={'text': 'new item text'})
+        form.is_valid()
+        form.save()
+        mock_List_create_new.assert_called_once_with(
+            first_item_text='new item text',
+            owner=user
+        )
+
+    @patch('lists.forms.List.create_new')
+    def test_save_returns_new_list_object(
+        self, mock_List_create_new
+    ):
+        user = Mock(is_authenticated=True)
+        form = NewListForm(owner=user, data={'text': 'new item text'})
+        form.is_valid()
+        saved_list = form.save()
+        self.assertEqual(saved_list, mock_List_create_new.return_value)

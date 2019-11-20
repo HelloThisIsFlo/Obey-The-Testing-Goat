@@ -2,15 +2,16 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+
 from textwrap import dedent
 
 from lists.models import Item, List
-from lists.forms import ItemForm
+from lists.forms import ItemForm, NewListForm
 User = get_user_model()
 
 
 def home_page(request):
-    return render(request, 'home.html', {'form': ItemForm()})
+    return render(request, 'home.html', {'form': NewListForm()})
 
 
 def view_list(request, list_id):
@@ -28,7 +29,8 @@ def view_list(request, list_id):
 
 def new_list(request):
     list_ = List()
-    list_.owner = request.user
+    if request.user.is_authenticated:
+        list_.owner = request.user
     list_.save()
     item = Item(list=list_)
     form = ItemForm(instance=item, data=request.POST)
@@ -38,6 +40,15 @@ def new_list(request):
     else:
         list_.delete()
         return render(request, 'home.html', {'form': form})
+
+
+def new_list2(request):
+    new_list_form = NewListForm(owner=request.user, data=request.POST)
+    if new_list_form.is_valid():
+        list_ = new_list_form.save()
+        return redirect(list_)
+    else:
+        return render(request, 'home.html', {'form': new_list_form})
 
 
 def my_lists(request, user_email):
