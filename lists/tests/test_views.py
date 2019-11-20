@@ -131,31 +131,16 @@ class NewListViewIntegratedTest(TestCase):
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, 'A new list item')
 
-    def test_redirects_after_POST(self):
-        response = self.client.post(
-            '/lists/new',
-            data={'text': 'A new list item'}
-        )
-        new_list = List.objects.first()
-        self.assertRedirects(response, f'/lists/{new_list.id}/')
-
-    def test_for_invalid_input_renders_home_template(self):
+    def test_on_error_validation_errors_are_show_on_home_page_and_nothing_is_saved(self):
         response = self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
-
-    def test_validation_errors_are_show_on_home_page(self):
-        response = self.client.post('/lists/new', data={'text': ''})
+        self.assertEqual(List.objects.count(), 0)
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
-    def test_for_invalid_input_passes_form_to_template(self):
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertIsInstance(response.context['form'], NewListForm)
-
-    def test_invalid_list_items_arent_saved(self):
-        self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(Item.objects.count(), 0)
-        self.assertEqual(List.objects.count(), 0)
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
+        user = User.objects.create(email='a@b.com')
+        self.client.force_login(user)
+        self.client.post('/lists/new', data={'text': 'new item text'})
+        self.assertEqual(user.list_set.first().name, 'new item text')
 
 
 @patch('lists.views.NewListForm')
