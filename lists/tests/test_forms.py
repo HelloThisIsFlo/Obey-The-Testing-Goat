@@ -20,14 +20,14 @@ from lists.models import List, Item
 
 class ItemFormTest(TestCase):
     def test_form_item_input_has_placeholder_and_css_classes(self):
-        form = ItemForm()
+        list_ = List.objects.create()
+        form = ItemForm(for_list=list_)
         self.assertIn('placeholder="Enter a to-do item"', form.as_p())
         self.assertIn('class="form-control input-lg', form.as_p())
 
     def test_form_validation_for_blank_items(self):
         list_ = List.objects.create()
-        item = Item(list=list_)
-        form = ItemForm(instance=item, data={'text': ''})
+        form = ItemForm(for_list=list_, data={'text': ''})
 
         with self.assertRaises(ValueError):
             form.save()
@@ -40,8 +40,7 @@ class ItemFormTest(TestCase):
 
     def test_form_save_handles_saving_to_a_list(self):
         list_ = List.objects.create()
-        item = Item(list=list_)
-        form = ItemForm(instance=item, data={'text': 'hello'})
+        form = ItemForm(for_list=list_, data={'text': 'hello'})
 
         new_item = form.save()
         self.assertEqual(new_item, Item.objects.first())
@@ -52,8 +51,7 @@ class ItemFormTest(TestCase):
         list_ = List.objects.create()
         Item.objects.create(list=list_, text='duplicate')
 
-        item = Item(list=list_)
-        form = ItemForm(instance=item, data={'text': 'duplicate'})
+        form = ItemForm(for_list=list_, data={'text': 'duplicate'})
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])

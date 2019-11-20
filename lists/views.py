@@ -16,10 +16,9 @@ def home_page(request):
 
 def view_list(request, list_id):
     list_ = List.objects.get(id=list_id)
-    item = Item(list=list_)
-    form = ItemForm()
+    form = ItemForm(for_list=list_)
     if request.method == 'POST':
-        form = ItemForm(instance=item, data=request.POST)
+        form = ItemForm(for_list=list_, data=request.POST)
         if form.is_valid():
             form.save()
             return redirect(list_)
@@ -32,8 +31,7 @@ def new_list(request):
     if request.user.is_authenticated:
         list_.owner = request.user
     list_.save()
-    item = Item(list=list_)
-    form = ItemForm(instance=item, data=request.POST)
+    form = ItemForm(for_list=list_, data=request.POST)
     if form.is_valid():
         form.save()
         return redirect(list_)

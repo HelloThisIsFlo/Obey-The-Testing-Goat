@@ -20,6 +20,10 @@ class ItemForm(forms.models.ModelForm):
             'text': {'required': EMPTY_ITEM_ERROR}
         }
 
+    def __init__(self, for_list, data=None):
+        super().__init__(data=data)
+        self.instance.list = for_list
+
     def clean(self):
         is_duplicate = Item.objects.filter(
             list=self.instance.list, text=self.cleaned_data.get('text', '')
