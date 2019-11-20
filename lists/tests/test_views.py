@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 
-from lists.views import home_page, new_list2
+from lists.views import home_page, new_list
 from lists.models import Item, List
 from lists.forms import NewListForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 User = get_user_model()
@@ -166,7 +166,7 @@ class NewListViewUnitTest(unittest.TestCase):
         self.request.user = AnonymousUser
 
     def test_passes_POST_data_and_current_user_to_NewListForm(self, MockNewListFormClass):
-        new_list2(self.request)
+        new_list(self.request)
         MockNewListFormClass.assert_called_once_with(
             owner=self.request.user,
             data=self.request.POST
@@ -175,7 +175,7 @@ class NewListViewUnitTest(unittest.TestCase):
     def test_saves_form_if_form_valid(self, MockNewListFormClass):
         mock_form = MockNewListFormClass.return_value
         mock_form.is_valid.return_value = True
-        new_list2(self.request)
+        new_list(self.request)
         mock_form.save.assert_called_once()
 
     @patch('lists.views.redirect')
@@ -187,7 +187,7 @@ class NewListViewUnitTest(unittest.TestCase):
         mock_form = MockNewListFormClass.return_value
         mock_form.is_valid.return_value = True
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         self.assertEqual(response, mock_redirect.return_value)
         mock_redirect.assert_called_once_with(mock_form.save.return_value)
@@ -201,7 +201,7 @@ class NewListViewUnitTest(unittest.TestCase):
         mock_form = MockNewListFormClass.return_value
         mock_form.is_valid.return_value = False
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         self.assertEqual(response, mock_render.return_value)
         mock_render.assert_called_once_with(
@@ -211,7 +211,7 @@ class NewListViewUnitTest(unittest.TestCase):
         mock_form = MockNewListFormClass.return_value
         mock_form.is_valid.return_value = False
 
-        new_list2(self.request)
+        new_list(self.request)
 
         mock_form.save.assert_not_called()
 

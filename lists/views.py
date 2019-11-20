@@ -27,20 +27,6 @@ def view_list(request, list_id):
 
 
 def new_list(request):
-    list_ = List()
-    if request.user.is_authenticated:
-        list_.owner = request.user
-    list_.save()
-    form = ExistingListItemForm(for_list=list_, data=request.POST)
-    if form.is_valid():
-        form.save()
-        return redirect(list_)
-    else:
-        list_.delete()
-        return render(request, 'home.html', {'form': form})
-
-
-def new_list2(request):
     new_list_form = NewListForm(owner=request.user, data=request.POST)
     if new_list_form.is_valid():
         list_ = new_list_form.save()
