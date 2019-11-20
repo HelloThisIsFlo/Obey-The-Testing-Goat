@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest
@@ -152,12 +153,26 @@ class NewListTest(TestCase):
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
 
-    def test_list_owner_is_saved_if_user_is_authenticated(self):
+    @patch('lists.views.List')
+    @patch('lists.views.Item')
+    @patch('lists.views.ItemForm')
+    def test_list_owner_is_saved_if_user_is_authenticated(
+            self,
+            MockItemFormClass,
+            MockItemClass,
+            MockListClass
+    ):
         user = User.objects.create(email='a@b.com')
         self.client.force_login(user)
+        mock_list = MockListClass.return_value
+
+        def check_owner_assigned():
+            self.assertEqual(mock_list.owner, user)
+        mock_list.save.side_effect = check_owner_assigned
+
         self.client.post('/lists/new', data={'text': 'New item in new list'})
-        new_list = List.objects.first()
-        self.assertEqual(new_list.owner, user)
+
+        mock_list.save.assert_called_once()
 
 
 class MyListsTest(TestCase):
