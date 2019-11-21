@@ -20,9 +20,14 @@
 [x] Clean up `wait_for` stuff in `base.py`
 
 [ ] NewListFromItemForm
-  [ ] Accepts data in constructor
-  [ ] Save w/ no arguments
-    [ ] Saves new list with item as first element
-    [ ] Returns saved list
+  [x] Accepts data in constructor
+  [x] Save w/ no arguments
+    [x] Saves new list with item as first element
+    [x] Returns saved list
+  [x] Blank items are invalid
 
 [ ] Re-implement `test_validation_errors_are_show_on_home_page` as integration test
+
+[ ] List.create_new
+  [ ] Creates new list
+  [ ] First item of the list is `first_item_text`

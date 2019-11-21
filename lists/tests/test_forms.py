@@ -1,6 +1,8 @@
 from django.test import TestCase
-from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm
+from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm, NewListFromItemForm
 from lists.models import List, Item
+import unittest
+from unittest.mock import patch
 
 # My understanding of forms so far
 # --------------------------------
@@ -53,3 +55,23 @@ class ItemFormTest(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])
+
+
+class NewListFromItemFormTest(unittest.TestCase):
+    @patch('lists.forms.List')
+    def test_saves_new_list_with_item(self, MockList):
+        form = NewListFromItemForm(data={'text': 'New item text'})
+
+        form.is_valid() # Populate 'cleaned_data'
+        saved_list = form.save()
+
+        MockList.create_new.assert_called_once_with(first_item_text='New item text')
+        self.assertEqual(saved_list, MockList.create_new.return_value)
+
+    def test_valid_items_are_valid(self):
+        form = NewListFromItemForm(data={'text': 'valid item'})
+        self.assertTrue(form.is_valid())
+
+    def test_blank_items_are_not_valid(self):
+        form = NewListFromItemForm(data={'text': ''})
+        self.assertFalse(form.is_valid())
