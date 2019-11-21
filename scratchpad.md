@@ -37,7 +37,6 @@
 
 
 [ ] New Feature / FT: Only logged in users can see their list
-  [ ] Not logged in -> No 'My lists' link
   [ ] Not logged in -> Can not access someone else list
   [ ] Not logged in -> Can not access someone else 'My lists'
   [ ] Logged in -> Can not access someone else list

@@ -7,7 +7,7 @@
 {% block extra_content %}
 <ul>
   {% for list in owner.list_set.all %}
-  <li>{{ list.name }}</li>
+  <li><a href="{{ list.get_absolute_url }}">{{ list.name }}</a> </li>
   {% endfor %}
 </ul>
 {% endblock %}
