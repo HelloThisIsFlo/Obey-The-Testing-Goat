@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.contrib.auth.models import AnonymousUser
 
-from lists.views import home_page, my_lists
+from lists.views import home_page, my_lists, new_list2
 from lists.models import Item, List
 from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 import unittest
@@ -152,6 +152,65 @@ class NewListTest(TestCase):
         self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
+
+
+@patch('lists.views.NewListFromItemForm')
+class NewListTest2(unittest.TestCase):
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.user = AnonymousUser()
+        self.request.POST['text'] = 'some text'
+
+    def test_can_save_a_POST_request(self, MockNewListFromItemForm):
+        new_list2(self.request)
+
+        MockNewListFromItemForm.assert_called_once_with(data=self.request.POST)
+        form = MockNewListFromItemForm()
+        form.save.assert_called_once()
+
+    @patch('lists.views.redirect')
+    def test_redirects_after_POST(self, mock_redirect, MockNewListFromItemForm):
+        form = MockNewListFromItemForm()
+
+        response = new_list2(self.request)
+
+        saved_list = form.save.return_value
+        mock_redirect.assert_called_once_with(saved_list)
+        self.assertEqual(response, mock_redirect.return_value)
+
+    @patch('lists.views.render')
+    def test_for_invalid_input_renders_home_template_with_form_containing_errors(
+        self,
+        mock_render,
+        MockNewListFromItemForm
+    ):
+        form = MockNewListFromItemForm()
+        form.is_valid.return_value = False
+
+        response = new_list2(self.request)
+
+        mock_render.assert_called_once_with(
+            self.request,
+            'home.html',
+            {'form': form}
+        )
+        self.assertEqual(response, mock_render.return_value)
+
+    @patch('lists.views.render')
+    def test_invalid_list_items_arent_saved(
+        self,
+        mock_render,
+        MockNewListFromItemForm
+    ):
+        form = MockNewListFromItemForm()
+        form.is_valid.return_value = False
+
+        response = new_list2(self.request)
+
+        form.save.assert_not_called()
+
+    # def test_validation_errors_are_show_on_home_page(self):
+    #     TODO: Keep as integration test only, once the rest is implemented
 
 
 @patch('lists.views.render')

@@ -18,3 +18,11 @@
 
 [ ] Make 'uid' in Token non-editable
 [x] Clean up `wait_for` stuff in `base.py`
+
+[ ] NewListFromItemForm
+  [ ] Accepts data in constructor
+  [ ] Save w/ no arguments
+    [ ] Saves new list with item as first element
+    [ ] Returns saved list
+
+[ ] Re-implement `test_validation_errors_are_show_on_home_page` as integration test

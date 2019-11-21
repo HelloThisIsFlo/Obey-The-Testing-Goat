@@ -29,3 +29,7 @@ class ItemForm(forms.models.ModelForm):
             raise ValidationError({'text': DUPLICATE_ITEM_ERROR})
 
         return super().clean()
+
+
+class NewListFromItemForm:
+    pass

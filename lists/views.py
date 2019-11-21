@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from textwrap import dedent
 
 from lists.models import Item, List
-from lists.forms import ItemForm
+from lists.forms import ItemForm, NewListFromItemForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -35,6 +35,15 @@ def new_list(request):
         return redirect(list_)
     else:
         list_.delete()
+        return render(request, 'home.html', {'form': form})
+
+
+def new_list2(request):
+    form = NewListFromItemForm(data=request.POST)
+    if form.is_valid():
+        saved_list = form.save()
+        return redirect(saved_list)
+    else:
         return render(request, 'home.html', {'form': form})
 
 
