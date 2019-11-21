@@ -45,5 +45,13 @@ class NewListFromItemForm(forms.models.ModelForm):
             })
         }
 
+    def __init__(self, data=None, owner=None):
+        super().__init__(data=data)
+        self.owner = owner
+
     def save(self):
-        return List.create_new(first_item_text=self.cleaned_data['text'])
+        text = self.cleaned_data['text']
+        if self.owner:
+            return List.create_new(first_item_text=text, owner=self.owner)
+        else:
+            return List.create_new(first_item_text=text)

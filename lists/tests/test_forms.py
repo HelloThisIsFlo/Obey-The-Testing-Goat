@@ -2,7 +2,7 @@ from django.test import TestCase
 from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm, NewListFromItemForm
 from lists.models import List, Item
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 # My understanding of forms so far
 # --------------------------------
@@ -72,6 +72,20 @@ class NewListFromItemFormTest(unittest.TestCase):
 
         MockList.create_new.assert_called_once_with(
             first_item_text='New item text')
+        self.assertEqual(saved_list, MockList.create_new.return_value)
+
+    @patch('lists.forms.List')
+    def test_saves_new_list_with_item_and_owner(self, MockList):
+        user = MagicMock()
+        form = NewListFromItemForm(owner=user, data={'text': 'New item text'})
+
+        form.is_valid()  # Populate 'cleaned_data'
+        saved_list = form.save()
+
+        MockList.create_new.assert_called_once_with(
+            first_item_text='New item text',
+            owner=user
+        )
         self.assertEqual(saved_list, MockList.create_new.return_value)
 
     def test_valid_items_are_valid(self):

@@ -23,8 +23,8 @@
   [x] Accepts data in constructor
   [x] Save w/ no arguments
     [x] Saves new list with item as first element
-    [ ] Saves owner if present
-    [ ] Owner is optional
+    [x] Saves owner if present
+    [x] Owner is optional
     [x] Returns saved list
   [x] Blank items are invalid
 
@@ -33,3 +33,4 @@
 [x] List.create_new
   [x] Creates new list
   [x] First item of the list is `first_item_text`
+  [ ] Optionally adds owner to list
