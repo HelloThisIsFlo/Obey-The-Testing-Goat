@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from lists.views import home_page, my_lists, new_list2
 from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
+from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm
 import unittest
 from unittest.mock import patch, ANY
 
@@ -17,9 +17,9 @@ class HomePageTest(TestCase):
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'home.html')
 
-    def test_uses_item_form(self):
+    def test_uses_new_list_from_item_form(self):
         response = self.client.get('/')
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], NewListFromItemForm)
 
 
 class ListViewTest(TestCase):
@@ -117,43 +117,6 @@ class ListViewTest(TestCase):
         self.assertContains(response, 'name="text"')
 
 
-class NewListTest(TestCase):
-    def test_can_save_a_POST_request(self):
-        response = self.client.post(
-            '/lists/new',
-            data={'text': 'A new list item'}
-        )
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'A new list item')
-
-    def test_redirects_after_POST(self):
-        response = self.client.post(
-            '/lists/new',
-            data={'text': 'A new list item'}
-        )
-        new_list = List.objects.first()
-        self.assertRedirects(response, f'/lists/{new_list.id}/')
-
-    def test_for_invalid_input_renders_home_template(self):
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
-
-    def test_validation_errors_are_show_on_home_page(self):
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
-
-    def test_for_invalid_input_passes_form_to_template(self):
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertIsInstance(response.context['form'], ItemForm)
-
-    def test_invalid_list_items_arent_saved(self):
-        self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(Item.objects.count(), 0)
-        self.assertEqual(List.objects.count(), 0)
-
-
 @patch('lists.views.NewListFromItemForm')
 class NewListTest2(unittest.TestCase):
     def setUp(self):
@@ -209,8 +172,20 @@ class NewListTest2(unittest.TestCase):
 
         form.save.assert_not_called()
 
-    # def test_validation_errors_are_show_on_home_page(self):
-    #     TODO: Keep as integration test only, once the rest is implemented
+
+class NewListIntegratedTest(TestCase):
+    def test_can_save_a_POST_request(self):
+        response = self.client.post(
+            '/lists/new',
+            data={'text': 'A new list item'}
+        )
+        self.assertEqual(List.objects.count(), 1)
+        new_list = List.objects.first()
+        self.assertEqual(new_list.item_set.first().text, 'A new list item')
+
+    def test_validation_errors_are_show_on_home_page(self):
+        response = self.client.post('/lists/new', data={'text': ''})
+        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
 
 @patch('lists.views.render')

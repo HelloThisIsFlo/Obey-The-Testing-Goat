@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 def home_page(request):
-    return render(request, 'home.html', {'form': ItemForm()})
+    return render(request, 'home.html', {'form': NewListFromItemForm()})
 
 
 def view_list(request, list_id):
@@ -24,18 +24,6 @@ def view_list(request, list_id):
             return redirect(list_)
 
     return render(request, 'list.html', {'list': list_, 'form': form})
-
-
-def new_list(request):
-    list_ = List.objects.create()
-    item = Item(list=list_)
-    form = ItemForm(instance=item, data=request.POST)
-    if form.is_valid():
-        form.save()
-        return redirect(list_)
-    else:
-        list_.delete()
-        return render(request, 'home.html', {'form': form})
 
 
 def new_list2(request):

@@ -35,6 +35,15 @@ class NewListFromItemForm(forms.models.ModelForm):
     class Meta:
         model = Item
         fields = ('text',)
+        error_messages = {
+            'text': {'required': EMPTY_ITEM_ERROR}
+        }
+        widgets = {
+            'text': forms.fields.TextInput(attrs={
+                'placeholder': 'Enter a to-do item',
+                'class': 'form-control input-lg',
+            })
+        }
 
     def save(self):
         return List.create_new(first_item_text=self.cleaned_data['text'])

@@ -58,14 +58,20 @@ class ItemFormTest(TestCase):
 
 
 class NewListFromItemFormTest(unittest.TestCase):
+    def test_form_item_input_has_placeholder_and_css_classes(self):
+        form = NewListFromItemForm()
+        self.assertIn('placeholder="Enter a to-do item"', form.as_p())
+        self.assertIn('class="form-control input-lg', form.as_p())
+
     @patch('lists.forms.List')
     def test_saves_new_list_with_item(self, MockList):
         form = NewListFromItemForm(data={'text': 'New item text'})
 
-        form.is_valid() # Populate 'cleaned_data'
+        form.is_valid()  # Populate 'cleaned_data'
         saved_list = form.save()
 
-        MockList.create_new.assert_called_once_with(first_item_text='New item text')
+        MockList.create_new.assert_called_once_with(
+            first_item_text='New item text')
         self.assertEqual(saved_list, MockList.create_new.return_value)
 
     def test_valid_items_are_valid(self):
