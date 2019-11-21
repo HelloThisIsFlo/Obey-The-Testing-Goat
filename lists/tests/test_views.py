@@ -117,6 +117,23 @@ class ListViewTest(TestCase):
         self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
+    def test_raise_404_when_user_not_logged_in_and_list_not_public(self):
+        owner = User.objects.create(email='a@b.com')
+        list_ = List.create_new(first_item_text='First list item', owner=owner)
+
+        response = self.client.get(list_.get_absolute_url(), follow=True)
+
+        self.assertContains(response, 'Page not found', status_code=404)
+
+    def test_logged_in_user_can_access_her_lists(self):
+        owner = User.objects.create(email='a@b.com')
+        list_ = List.create_new(first_item_text='First list item', owner=owner)
+        self.client.force_login(owner)
+
+        response = self.client.get(list_.get_absolute_url(), follow=True)
+
+        self.assertContains(response, 'First list item', status_code=200)
+
 
 @patch('lists.views.NewListFromItemForm')
 class NewListTest(unittest.TestCase):

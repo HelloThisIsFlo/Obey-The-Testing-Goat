@@ -15,6 +15,11 @@ def home_page(request):
 
 def view_list(request, list_id):
     list_ = List.objects.get(id=list_id)
+
+    if list_.owner:
+        if list_.owner != request.user:
+            raise Http404()
+
     item = Item(list=list_)
     form = ExistingListItemForm()
     if request.method == 'POST':
