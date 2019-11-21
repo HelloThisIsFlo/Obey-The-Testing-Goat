@@ -33,4 +33,4 @@
 [x] List.create_new
   [x] Creates new list
   [x] First item of the list is `first_item_text`
-  [ ] Optionally adds owner to list
+  [x] Optionally adds owner to list

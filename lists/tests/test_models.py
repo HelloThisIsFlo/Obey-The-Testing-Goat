@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 
 from lists.models import Item, List
+User = get_user_model()
 
 
 class ItemModelTest(TestCase):
@@ -20,6 +22,19 @@ class ListModelTest(TestCase):
         self.assertEqual(List.objects.count(), 1)
         self.assertEqual(created_list, List.objects.first())
         self.assertEqual(created_list.item_set.first().text, 'New item text')
+
+    def test_create_new_creates_new_list_with_first_item_and_owner(self):
+        user = User.objects.create(email='a@b.com')
+
+        returned_list = List.create_new(
+            first_item_text='New item text',
+            owner=user
+        )
+
+        self.assertEqual(List.objects.count(), 1)
+        created_list = List.objects.first()
+        self.assertEqual(created_list, returned_list)
+        self.assertEqual(created_list.owner, user)
 
 
 class ListAndItemModelTest(TestCase):
