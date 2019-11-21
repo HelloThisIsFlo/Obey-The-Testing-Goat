@@ -5,6 +5,8 @@ from textwrap import dedent
 
 from lists.models import Item, List
 from lists.forms import ItemForm
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 def home_page(request):
@@ -34,3 +36,8 @@ def new_list(request):
     else:
         list_.delete()
         return render(request, 'home.html', {'form': form})
+
+
+def my_lists(request, user_email):
+    owner = User.objects.get(email=user_email)
+    return render(request, 'my_lists.html', {'owner': owner})
