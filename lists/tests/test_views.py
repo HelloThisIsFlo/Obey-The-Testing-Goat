@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.contrib.auth.models import AnonymousUser
 
-from lists.views import home_page, my_lists, new_list2
+from lists.views import home_page, my_lists, new_list
 from lists.models import Item, List
 from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm
 import unittest
@@ -125,7 +125,7 @@ class NewListTest2(unittest.TestCase):
         self.request.POST['text'] = 'some text'
 
     def test_can_save_a_POST_request(self, MockNewListFromItemForm):
-        new_list2(self.request)
+        new_list(self.request)
 
         MockNewListFromItemForm.assert_called_once_with(data=self.request.POST)
         form = MockNewListFromItemForm()
@@ -135,7 +135,7 @@ class NewListTest2(unittest.TestCase):
     def test_redirects_after_POST(self, mock_redirect, MockNewListFromItemForm):
         form = MockNewListFromItemForm()
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         saved_list = form.save.return_value
         mock_redirect.assert_called_once_with(saved_list)
@@ -150,7 +150,7 @@ class NewListTest2(unittest.TestCase):
         form = MockNewListFromItemForm()
         form.is_valid.return_value = False
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         mock_render.assert_called_once_with(
             self.request,
@@ -168,7 +168,7 @@ class NewListTest2(unittest.TestCase):
         form = MockNewListFromItemForm()
         form.is_valid.return_value = False
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         form.save.assert_not_called()
 
