@@ -4,6 +4,8 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 from lists.views import home_page, my_lists, new_list
 from lists.models import Item, List
@@ -128,6 +130,16 @@ class NewListTest2(unittest.TestCase):
         new_list(self.request)
 
         MockNewListFromItemForm.assert_called_once_with(data=self.request.POST)
+        form = MockNewListFromItemForm()
+        form.save.assert_called_once()
+
+    def test_saves_current_user_as_owner_if_authenticated(self, MockNewListFromItemForm):
+        logged_in_user = User(email='a@b.com')
+        self.request.user = logged_in_user
+
+        new_list(self.request)
+
+        MockNewListFromItemForm.assert_called_once_with(data=self.request.POST, owner=logged_in_user)
         form = MockNewListFromItemForm()
         form.save.assert_called_once()
 

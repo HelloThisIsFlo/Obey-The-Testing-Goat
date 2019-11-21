@@ -19,15 +19,17 @@
 [ ] Make 'uid' in Token non-editable
 [x] Clean up `wait_for` stuff in `base.py`
 
-[ ] NewListFromItemForm
+[x] NewListFromItemForm
   [x] Accepts data in constructor
   [x] Save w/ no arguments
     [x] Saves new list with item as first element
+    [ ] Saves owner if present
+    [ ] Owner is optional
     [x] Returns saved list
   [x] Blank items are invalid
 
-[ ] Re-implement `test_validation_errors_are_show_on_home_page` as integration test
+[x] Re-implement `test_validation_errors_are_show_on_home_page` as integration test
 
-[ ] List.create_new
-  [ ] Creates new list
-  [ ] First item of the list is `first_item_text`
+[x] List.create_new
+  [x] Creates new list
+  [x] First item of the list is `first_item_text`
