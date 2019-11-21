@@ -245,6 +245,11 @@ class MyListsTest(unittest.TestCase):
         with self.assertRaises(Http404):
             my_lists(self.request, 'a@b.com')
 
+    def test_raise_404_when_logged_in_user_is_not_owner(self, MockUserClass, mock_render):
+        self.request.user = User('not_owner@example.com')
+
+        with self.assertRaises(Http404):
+            my_lists(self.request, 'owner@example.com')
 
 class MyListsIntegratedTest(TestCase):
     def test_shows_all_of_users_lists(self):

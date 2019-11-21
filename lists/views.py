@@ -45,7 +45,14 @@ def new_list(request):
 
 
 def my_lists(request, user_email):
-    if not request.user.is_authenticated:
+    def is_authorized(user):
+        if not user.is_authenticated:
+            return False
+        if user.email != user_email:
+            return False
+        return True
+
+    if not is_authorized(request.user):
         raise Http404()
 
     owner = User.objects.get(email=user_email)
