@@ -34,3 +34,11 @@
   [x] Creates new list
   [x] First item of the list is `first_item_text`
   [x] Optionally adds owner to list
+
+
+[ ] New Feature / FT: Only logged in users can see their list
+  [ ] Not logged in -> No 'My lists' link
+  [ ] Not logged in -> Can not access someone else list
+  [ ] Not logged in -> Can not access someone else 'My lists'
+  [ ] Logged in -> Can not access someone else list
+  [ ] Logged in -> Can not access someone else 'My lists'

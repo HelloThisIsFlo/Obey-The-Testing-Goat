@@ -1,3 +1,8 @@
+from unittest.mock import patch, ANY
+import unittest
+from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm
+from lists.models import Item, List
+from lists.views import home_page, my_lists, new_list
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest
@@ -6,12 +11,6 @@ from django.utils.html import escape
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 User = get_user_model()
-
-from lists.views import home_page, my_lists, new_list
-from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm
-import unittest
-from unittest.mock import patch, ANY
 
 
 class HomePageTest(TestCase):
@@ -120,7 +119,7 @@ class ListViewTest(TestCase):
 
 
 @patch('lists.views.NewListFromItemForm')
-class NewListTest2(unittest.TestCase):
+class NewListTest(unittest.TestCase):
     def setUp(self):
         self.request = HttpRequest()
         self.request.user = AnonymousUser()
@@ -139,7 +138,8 @@ class NewListTest2(unittest.TestCase):
 
         new_list(self.request)
 
-        MockNewListFromItemForm.assert_called_once_with(data=self.request.POST, owner=logged_in_user)
+        MockNewListFromItemForm.assert_called_once_with(
+            data=self.request.POST, owner=logged_in_user)
         form = MockNewListFromItemForm()
         form.save.assert_called_once()
 
@@ -221,3 +221,23 @@ class MyListsTest(unittest.TestCase):
             context['owner'],
             MockUserClass.objects.get.return_value
         )
+
+
+class MyListsIntegratedTest(TestCase):
+    def test_shows_all_of_users_lists(self):
+        User.objects.create(email='not_owner@b.com')
+        user = User.objects.create(email='owner@b.com')
+        List.create_new(
+            first_item_text='First item from first list',
+            owner=user
+        )
+        List.create_new(
+            first_item_text='First item from second list',
+            owner=user
+        )
+
+        self.client.force_login(user)
+        response = self.client.get('/lists/users/owner@b.com/')
+
+        self.assertContains(response, 'First item from first list')
+        self.assertContains(response, 'First item from second list')
