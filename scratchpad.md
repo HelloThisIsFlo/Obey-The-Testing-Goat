@@ -41,3 +41,5 @@
   [ ] Not logged in -> Can not access someone else 'My lists'
   [ ] Logged in -> Can not access someone else list
   [ ] Logged in -> Can not access someone else 'My lists'
+
+[x] Remove duplication in `forms`

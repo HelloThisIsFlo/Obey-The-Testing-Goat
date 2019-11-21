@@ -20,6 +20,8 @@ class ItemForm(forms.models.ModelForm):
             'text': {'required': EMPTY_ITEM_ERROR}
         }
 
+
+class ExistingListItemForm(ItemForm):
     def clean(self):
         is_duplicate = Item.objects.filter(
             list=self.instance.list, text=self.cleaned_data.get('text', '')
@@ -31,20 +33,7 @@ class ItemForm(forms.models.ModelForm):
         return super().clean()
 
 
-class NewListFromItemForm(forms.models.ModelForm):
-    class Meta:
-        model = Item
-        fields = ('text',)
-        error_messages = {
-            'text': {'required': EMPTY_ITEM_ERROR}
-        }
-        widgets = {
-            'text': forms.fields.TextInput(attrs={
-                'placeholder': 'Enter a to-do item',
-                'class': 'form-control input-lg',
-            })
-        }
-
+class NewListFromItemForm(ItemForm):
     def __init__(self, data=None, owner=None):
         super().__init__(data=data)
         self.owner = owner

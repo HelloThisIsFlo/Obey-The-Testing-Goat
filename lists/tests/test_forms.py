@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ItemForm, NewListFromItemForm
+from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm, NewListFromItemForm
 from lists.models import List, Item
 import unittest
 from unittest.mock import patch, MagicMock
@@ -18,14 +18,14 @@ from unittest.mock import patch, MagicMock
 
 class ItemFormTest(TestCase):
     def test_form_item_input_has_placeholder_and_css_classes(self):
-        form = ItemForm()
+        form = ExistingListItemForm()
         self.assertIn('placeholder="Enter a to-do item"', form.as_p())
         self.assertIn('class="form-control input-lg', form.as_p())
 
     def test_form_validation_for_blank_items(self):
         list_ = List.objects.create()
         item = Item(list=list_)
-        form = ItemForm(instance=item, data={'text': ''})
+        form = ExistingListItemForm(instance=item, data={'text': ''})
 
         with self.assertRaises(ValueError):
             form.save()
@@ -39,7 +39,7 @@ class ItemFormTest(TestCase):
     def test_form_save_handles_saving_to_a_list(self):
         list_ = List.objects.create()
         item = Item(list=list_)
-        form = ItemForm(instance=item, data={'text': 'hello'})
+        form = ExistingListItemForm(instance=item, data={'text': 'hello'})
 
         new_item = form.save()
         self.assertEqual(new_item, Item.objects.first())
@@ -51,7 +51,7 @@ class ItemFormTest(TestCase):
         Item.objects.create(list=list_, text='duplicate')
 
         item = Item(list=list_)
-        form = ItemForm(instance=item, data={'text': 'duplicate'})
+        form = ExistingListItemForm(instance=item, data={'text': 'duplicate'})
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])
