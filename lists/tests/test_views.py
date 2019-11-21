@@ -5,7 +5,7 @@ from lists.models import Item, List
 from lists.views import home_page, my_lists, new_list
 from django.test import TestCase
 from django.urls import resolve
-from django.http import HttpRequest
+from django.http import HttpRequest, Http404
 from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.contrib.auth.models import AnonymousUser
@@ -205,7 +205,7 @@ class NewListIntegratedTest(TestCase):
 class MyListsTest(unittest.TestCase):
     def setUp(self):
         self.request = HttpRequest()
-        self.request.user = AnonymousUser()
+        self.request.user = User(email='a@b.com')
 
     def test_renders_my_lists_template(self, MockUserClass, mock_render):
         response = my_lists(self.request, 'a@b.com')
@@ -221,6 +221,12 @@ class MyListsTest(unittest.TestCase):
             context['owner'],
             MockUserClass.objects.get.return_value
         )
+
+    def test_raise_404_when_user_not_logged_in(self, MockUserClass, mock_render):
+        self.request.user = AnonymousUser()
+
+        with self.assertRaises(Http404):
+            my_lists(self.request, 'a@b.com')
 
 
 class MyListsIntegratedTest(TestCase):

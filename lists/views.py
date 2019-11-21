@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.core.exceptions import ValidationError
 from textwrap import dedent
 
@@ -40,5 +40,8 @@ def new_list(request):
 
 
 def my_lists(request, user_email):
+    if not request.user.is_authenticated:
+        raise Http404()
+
     owner = User.objects.get(email=user_email)
     return render(request, 'my_lists.html', {'owner': owner})
