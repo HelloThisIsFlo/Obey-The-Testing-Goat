@@ -61,6 +61,17 @@ class FunctionalTest(StaticLiveServerTestCase):
         navbar = self.browser.find_element_by_css_selector('.navbar')
         self.assertNotIn(email, navbar.text)
 
+    @wait
+    def wait_for_404_page(self):
+        self.assertEqual(
+            self.browser.find_element_by_css_selector('.jumbotron h1').text,
+            'Page not found'
+        )
+
+    @wait
+    def wait_for_link(self, link_text):
+        self.browser.find_element_by_link_text(link_text)
+
     def add_list_item(self, item_text):
         num_rows = len(
             self.browser.find_elements_by_css_selector('#id_list_table tr')
@@ -69,3 +80,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.get_item_input_box().send_keys(Keys.ENTER)
         item_number = num_rows + 1
         self.wait_for_row_in_list_table(f'{item_number}: {item_text}')
+
+    def get_path(self, path):
+        return self.browser.get(self.live_server_url + path)
