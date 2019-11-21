@@ -15,6 +15,12 @@ class ListModelTest(TestCase):
         list_ = List.objects.create()
         self.assertEqual(list_.get_absolute_url(), f'/lists/{list_.id}/')
 
+    def test_create_new_creates_new_list_with_first_item(self):
+        created_list = List.create_new(first_item_text='New item text')
+        self.assertEqual(List.objects.count(), 1)
+        self.assertEqual(created_list, List.objects.first())
+        self.assertEqual(created_list.item_set.first().text, 'New item text')
+
 
 class ListAndItemModelTest(TestCase):
     def test_item_is_related_to_list(self):
