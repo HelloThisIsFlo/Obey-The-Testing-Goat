@@ -31,6 +31,13 @@ def wait(assertion_fn):
     return decorated
 
 
+class _Pages:
+    def __init__(self, test):
+        self.list = ListPage(test)
+        self.home = HomePage(test)
+        self.my_lists = MyListsPage(test)
+
+
 class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -38,6 +45,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         if self.staging_server:
             self.live_server_url = 'http://' + self.staging_server
             reset_database(self.staging_server)
+
+        self.pages = _Pages(self)
 
     def tearDown(self):
         if self._test_has_failed():
@@ -75,7 +84,6 @@ class FunctionalTest(StaticLiveServerTestCase):
             window_id=self._windowid,
             timestamp=timestamp
         )
-
 
     def get_item_input_box(self):
         return self.browser.find_element_by_id('id_text')
@@ -139,3 +147,68 @@ class FunctionalTest(StaticLiveServerTestCase):
             value=session_key,
             path='/',
         ))
+
+
+class BasePage:
+    def __init__(self, test):
+        self.test = test
+
+    @wait
+    def wait_for_link(self, link_text):
+        self.browser.find_element_by_link_text(link_text)
+
+    def click_link(self, link_text):
+        self.test.browser.find_element_by_link_text(
+            link_text
+        ).click()
+        return self
+
+
+class BaseListPage(BasePage):
+    def get_item_input_box(self):
+        return self.test.browser.find_element_by_id('id_text')
+
+    def get_table_rows(self):
+        return self.test.browser.find_elements_by_css_selector('#id_list_table tr')
+
+    @wait
+    def wait_for_row_in_list_table(self, item_text, item_number):
+        expected_row_text = f'{item_number}: {item_text}'
+        rows = self.get_table_rows()
+        self.test.assertIn(expected_row_text, [row.text for row in rows])
+
+    def add_list_item(self, item_text):
+        new_item_number = len(self.get_table_rows()) + 1
+        self.get_item_input_box().send_keys(item_text)
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table(item_text, new_item_number)
+        return self
+
+
+class HomePage(BaseListPage):
+    def create_new_list(self, first_item_text):
+        return self.add_list_item(first_item_text)
+
+
+class ListPage(BaseListPage):
+    def get_share_box(self):
+        return self.test.browser.find_element_by_css_selector(
+            'input[name="sharee"]'
+        )
+
+    def get_shared_with_list(self):
+        return self.test.browser.find_elements_by_css_selector(
+            '.list-sharee'
+        )
+
+    def share_list_with(self, email):
+        self.get_share_box().send_keys(email)
+        self.get_share_box().send_keys(Keys.ENTER)
+        self.test.wait_for(lambda: self.test.assertIn(
+            email,
+            [item.text for item in self.get_shared_with_list()]
+        ))
+
+
+class MyListsPage(BasePage):
+    pass

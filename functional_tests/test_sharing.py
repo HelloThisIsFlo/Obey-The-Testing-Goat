@@ -8,6 +8,7 @@ def quit_if_possible(browser):
     except:
         pass
 
+
 class SharingTest(FunctionalTest):
     def test_can_share_a_list_with_another_user(self):
         # Edith is a logged-in user
@@ -24,13 +25,15 @@ class SharingTest(FunctionalTest):
         # Edith goes to the home page and starts a list
         self.browser = edith_browser
         self.browser.get(self.live_server_url)
-        self.add_list_item('Get help')
+        self.pages.home.add_list_item('Get help')
 
         # She notices a 'Share this list' option
-        share_box = self.browser.find_element_by_css_selector(
-            'input[name="sharee"]'
-        )
+        share_box = self.pages.list.get_share_box()
         self.assertEqual(
             share_box.get_attribute('placeholder'),
             'your-friend@example.com'
         )
+
+        # She shares her list
+        # The page updates to say that it's shared with Oniciferous
+        self.pages.list.share_list_with('oniciferous@example.com')
