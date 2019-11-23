@@ -36,10 +36,39 @@
   [x] Optionally adds owner to list
 
 
-[ ] New Feature / FT: Only logged in users can see their list
-  [ ] Not logged in -> Can not access someone else list
-  [ ] Not logged in -> Can not access someone else 'My lists'
-  [ ] Logged in -> Can not access someone else list
-  [ ] Logged in -> Can not access someone else 'My lists'
+[x] New Feature / FT: Only logged in users can see their list
+  [x] Not logged in -> Can not access someone else list
+  [x] Not logged in -> Can not access someone else 'My lists'
+  [x] Logged in -> Can not access someone else list
+  [x] Logged in -> Can not access someone else 'My lists'
 
 [x] Remove duplication in `forms`
+
+
+## Sharing
+
+Before going w/ the 'Sharing' model way, explore 'ManyToMany' in Spike
+
+
+[ ] Feature / FT
+  [ ] User doesn't exist error
+
+[ ] List View
+  [ ] Passes NewSharingForm in `share_form`
+
+[ ] Share View
+  [ ] Creates a NewSharingForm & call save (no is_valid for now)
+  [ ] Redirects to list
+
+[ ] NewSharingForm
+  [ ] placeholder: "your-friend@example.com"
+  [ ] Takes list_id & data['email'] in init
+  [ ] Call `List.add_sharee(list_id=..., email=...)` on save
+
+[ ] `List.add_sharee(list_id=..., email=...)`
+    Non-mocked tests
+  [ ] Adds sharee
+      - This will test it saves, but also that it 'can' save a list of sharee
+
+[ ] SharingTest
+  [ ] Create sharing w/ email & list
