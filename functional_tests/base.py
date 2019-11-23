@@ -154,6 +154,13 @@ class BasePage:
         self.test = test
 
     @wait
+    def wait_for_h1(self, h1_text):
+        self.test.assertEqual(
+            self.test.browser.find_element_by_tag_name('h1').text,
+            h1_text
+        )
+
+    @wait
     def wait_for_link(self, link_text):
         self.browser.find_element_by_link_text(link_text)
 
@@ -186,6 +193,11 @@ class BaseListPage(BasePage):
 
 
 class HomePage(BaseListPage):
+    def go(self):
+        self.test.browser.get(self.test.live_server_url)
+        self.wait_for_h1('Start a new To-Do list')
+        return self
+
     def create_new_list(self, first_item_text):
         return self.add_list_item(first_item_text)
 
@@ -209,6 +221,14 @@ class ListPage(BaseListPage):
             [item.text for item in self.get_shared_with_list()]
         ))
 
+    def get_list_owner(self):
+        return self.test.browser.find_element_by_id('id_list_owner').text
+
 
 class MyListsPage(BasePage):
-    pass
+    def go(self):
+        self.test.browser.get(self.test.live_server_url)
+        self.wait_for_h1('Start a new To-Do list')
+        self.click_link('My lists')
+        self.wait_for_h1('My Lists')
+        return self
