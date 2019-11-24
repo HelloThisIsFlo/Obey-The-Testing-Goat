@@ -44,3 +44,6 @@ class NewListFromItemForm(ItemForm):
             return List.create_new(first_item_text=text, owner=self.owner)
         else:
             return List.create_new(first_item_text=text)
+
+class SharingForm(forms.Form):
+    sharee = forms.CharField()

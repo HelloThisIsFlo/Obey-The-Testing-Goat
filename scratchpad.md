@@ -53,19 +53,23 @@ Before going w/ the 'Sharing' model way, explore 'ManyToMany' in Spike
 [ ] Feature / FT
   [ ] User doesn't exist error
 
-[ ] List View
-  [ ] Passes NewSharingForm in `share_form`
+[x] List View
+  [x] Passes SharingForm in `share_form`
 
-[ ] Share View
-  [ ] Creates a NewSharingForm & call save (no is_valid for now)
-  [ ] Redirects to list
+[x] Share View
+  [x] Creates a SharingForm & call save (no is_valid for now)
+  [x] Redirects to list
 
-[ ] NewSharingForm
+---- Can implement until here, then think a bit more
+
+[ ] SharingForm
   [ ] placeholder: "your-friend@example.com"
   [ ] Takes list_id & data['email'] in init
   [ ] Call `List.add_sharee(list_id=..., email=...)` on save
 
+
 [ ] `List.add_sharee(list_id=..., email=...)`
+    Or add it to instance `list_.add_sharee(email=...)`
     Non-mocked tests
   [ ] Adds sharee
       - This will test it saves, but also that it 'can' save a list of sharee

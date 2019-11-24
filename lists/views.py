@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from textwrap import dedent
 
 from lists.models import Item, List
-from lists.forms import ExistingListItemForm, NewListFromItemForm
+from lists.forms import ExistingListItemForm, NewListFromItemForm, SharingForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -28,7 +28,7 @@ def view_list(request, list_id):
             form.save()
             return redirect(list_)
 
-    return render(request, 'list.html', {'list': list_, 'form': form})
+    return render(request, 'list.html', {'list': list_, 'form': form, 'sharing_form': SharingForm()})
 
 
 def new_list(request):
@@ -57,3 +57,9 @@ def my_lists(request, user_email):
 
     owner = User.objects.get(email=user_email)
     return render(request, 'my_lists.html', {'owner': owner})
+
+
+def share(request, list_id):
+    sharing_form = SharingForm(list_id=list_id, data=request.POST)
+    updated_list = sharing_form.save()
+    return redirect(updated_list)
