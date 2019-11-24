@@ -42,6 +42,16 @@ class ListModelTest(TestCase):
         self.assertEqual(created_list, returned_list)
         self.assertEqual(created_list.owner, user)
 
+    def test_add_sharee(self):
+        owner = User.objects.create(email='owner@example.com')
+        frank = User.objects.create(email='frank@example.com')
+        list_ = List.create_new(first_item_text='1st item text', owner=owner)
+
+        list_.add_sharee(email='frank@example.com')
+
+        saved_list = List.objects.get(id=list_.id)
+        self.assertEqual(saved_list.sharees.first(), frank)
+
 
 class ListAndItemModelTest(TestCase):
     def test_item_is_related_to_list(self):

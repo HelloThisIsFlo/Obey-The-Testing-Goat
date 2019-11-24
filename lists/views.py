@@ -61,5 +61,6 @@ def my_lists(request, user_email):
 
 def share(request, list_id):
     sharing_form = SharingForm(list_id=list_id, data=request.POST)
+    sharing_form.is_valid()
     updated_list = sharing_form.save()
     return redirect(updated_list)

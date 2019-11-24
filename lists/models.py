@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class List(models.Model):
@@ -10,8 +13,17 @@ class List(models.Model):
         null=True
     )
 
+    sharees = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='+'
+    )
+
     def get_absolute_url(self):
         return reverse('view_list', args=[self.id])
+
+    def add_sharee(self,  email):
+        sharee = User.objects.get(email=email)
+        self.sharees.add(sharee)
 
     @staticmethod
     def create_new(first_item_text, owner=None):

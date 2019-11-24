@@ -45,5 +45,20 @@ class NewListFromItemForm(ItemForm):
         else:
             return List.create_new(first_item_text=text)
 
+
 class SharingForm(forms.Form):
-    sharee = forms.CharField()
+    sharee = forms.CharField(widget=forms.TextInput(
+        attrs={
+            'placeholder': 'your-friend@example.com',
+            'class': 'form-control input'
+        }
+    ))
+
+    def __init__(self, list_id=None, data=None):
+        self.list_id = list_id
+        super().__init__(data=data)
+
+    def save(self):
+        list_ = List.objects.get(id=self.list_id)
+        list_.add_sharee(email=self.cleaned_data['sharee'])
+        return  list_

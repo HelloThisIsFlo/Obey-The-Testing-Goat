@@ -63,9 +63,10 @@ Before going w/ the 'Sharing' model way, explore 'ManyToMany' in Spike
 ---- Can implement until here, then think a bit more
 
 [ ] SharingForm
-  [ ] placeholder: "your-friend@example.com"
+  [x] placeholder: "your-friend@example.com"
   [ ] Takes list_id & data['email'] in init
   [ ] Call `List.add_sharee(list_id=..., email=...)` on save
+  [ ] Returns updated list on save
 
 
 [ ] `List.add_sharee(list_id=..., email=...)`
@@ -73,6 +74,8 @@ Before going w/ the 'Sharing' model way, explore 'ManyToMany' in Spike
     Non-mocked tests
   [ ] Adds sharee
       - This will test it saves, but also that it 'can' save a list of sharee
+
+  
 
 [ ] SharingTest
   [ ] Create sharing w/ email & list

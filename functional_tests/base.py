@@ -162,7 +162,7 @@ class BasePage:
 
     @wait
     def wait_for_link(self, link_text):
-        self.browser.find_element_by_link_text(link_text)
+        self.test.browser.find_element_by_link_text(link_text)
 
     def click_link(self, link_text):
         self.test.browser.find_element_by_link_text(
@@ -230,5 +230,5 @@ class MyListsPage(BasePage):
         self.test.browser.get(self.test.live_server_url)
         self.wait_for_h1('Start a new To-Do list')
         self.click_link('My lists')
-        self.wait_for_h1('My Lists')
+        self.wait_for_h1('My lists')
         return self

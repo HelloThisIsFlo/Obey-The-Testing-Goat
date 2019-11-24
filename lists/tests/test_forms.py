@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm, NewListFromItemForm
+from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm, NewListFromItemForm, SharingForm
 from lists.models import List, Item
 import unittest
 from unittest.mock import patch, MagicMock
@@ -95,3 +95,31 @@ class NewListFromItemFormTest(unittest.TestCase):
     def test_blank_items_are_not_valid(self):
         form = NewListFromItemForm(data={'text': ''})
         self.assertFalse(form.is_valid())
+
+
+class SharingFormTest(unittest.TestCase):
+    def test_form_item_input_has_placeholder_and_css_classes(self):
+        form = SharingForm()
+        self.assertIn('placeholder="your-friend@example.com"', form.as_p())
+        self.assertIn('class="form-control input', form.as_p())
+
+    @patch('lists.forms.List')
+    def test_fetches_list_and_add_sharee_on_save(self, MockList):
+        form = SharingForm(list_id=1234, data={'sharee': 'a@b.com'})
+
+        form.is_valid() # populate 'cleaned_data'
+        form.save()
+
+        MockList.objects.get.assert_called_once_with(id=1234)
+        list_ = MockList.objects.get.return_value
+        list_.add_sharee.assert_called_once_with(email='a@b.com')
+
+    @patch('lists.forms.List')
+    def test_returns_updated_list_on_save(self, MockList):
+        form = SharingForm(list_id=1234, data={'sharee': 'a@b.com'})
+
+        form.is_valid() # populate 'cleaned_data'
+        resp = form.save()
+
+        list_ = MockList.objects.get.return_value
+        self.assertEqual(resp, list_)
