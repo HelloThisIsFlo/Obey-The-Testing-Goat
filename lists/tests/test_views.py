@@ -140,6 +140,17 @@ class ListViewTest(TestCase):
 
         self.assertContains(response, 'First list item', status_code=200)
 
+    def test_logged_in_user_can_access_lists_shared_with_her(self):
+        owner = User.objects.create(email='a@b.com')
+        edith = User.objects.create(email='edith@b.com')
+        list_ = List.create_new(first_item_text='First list item', owner=owner)
+        list_.add_sharee(email='edith@b.com')
+        self.client.force_login(edith)
+
+        response = self.client.get(list_.get_absolute_url(), follow=True)
+
+        self.assertContains(response, 'First list item', status_code=200)
+
 
 @patch('lists.views.NewListFromItemForm')
 class NewListTest(unittest.TestCase):

@@ -159,10 +159,12 @@ class BasePage:
             self.test.browser.find_element_by_tag_name('h1').text,
             h1_text
         )
+        return self
 
     @wait
     def wait_for_link(self, link_text):
         self.test.browser.find_element_by_link_text(link_text)
+        return self
 
     def click_link(self, link_text):
         self.test.browser.find_element_by_link_text(
@@ -183,6 +185,7 @@ class BaseListPage(BasePage):
         expected_row_text = f'{item_number}: {item_text}'
         rows = self.get_table_rows()
         self.test.assertIn(expected_row_text, [row.text for row in rows])
+        return self
 
     def add_list_item(self, item_text):
         new_item_number = len(self.get_table_rows()) + 1
@@ -220,6 +223,7 @@ class ListPage(BaseListPage):
             email,
             [item.text for item in self.get_shared_with_list()]
         ))
+        return self
 
     def get_list_owner(self):
         return self.test.browser.find_element_by_id('id_list_owner').text

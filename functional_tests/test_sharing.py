@@ -40,12 +40,10 @@ class SharingTest(FunctionalTest):
         self.pages.list.share_list_with('oniciferous@example.com')
 
         # Oniciferous now goes to the lists pag with his browser
+        # He sees Edith's list in there!
         self.browser = oni_browser
         self.pages.my_lists\
-            .go()
-
-        # He sees Edith's list in there!
-        self.pages.my_lists\
+            .go()\
             .wait_for_link('Get help')\
             .click_link('Get help')
 

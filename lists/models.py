@@ -15,7 +15,7 @@ class List(models.Model):
 
     sharees = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name='+'
+        related_name='shared_lists'
     )
 
     def get_absolute_url(self):

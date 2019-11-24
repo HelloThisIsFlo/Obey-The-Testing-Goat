@@ -14,11 +14,29 @@ def home_page(request):
 
 
 def view_list(request, list_id):
+    def authorized():
+        is_public_list = not list_.owner
+        if is_public_list:
+            return True
+
+        if not request.user.is_authenticated:
+            return False
+
+        if list_.owner == request.user:
+            return True
+
+        list_shared_with_logged_in_user = list_.sharees.filter(
+            email=request.user.email
+        ).exists()
+        if list_shared_with_logged_in_user:
+            return True
+
+        return False
+
     list_ = List.objects.get(id=list_id)
 
-    if list_.owner:
-        if list_.owner != request.user:
-            raise Http404()
+    if not authorized():
+        raise Http404()
 
     item = Item(list=list_)
     form = ExistingListItemForm()
