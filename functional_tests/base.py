@@ -172,6 +172,9 @@ class BasePage:
         ).click()
         return self
 
+    def get_error_element(self):
+        return self.test.browser.find_element_by_css_selector('.has-error')
+
 
 class BaseListPage(BasePage):
     def get_item_input_box(self):

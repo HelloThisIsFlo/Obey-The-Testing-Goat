@@ -1,6 +1,6 @@
 from unittest.mock import patch, ANY
 import unittest
-from lists.forms import ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm, SharingForm
+from lists.forms import NewItemWithExistingListForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm, SharingForm
 from lists.models import Item, List
 from lists.views import home_page, my_lists, new_list, share
 from django.test import TestCase
@@ -96,7 +96,7 @@ class ListViewTest(TestCase):
 
     def test_for_invalid_input_passes_form_to_template(self):
         response = self.post_invalid_input()
-        self.assertIsInstance(response.context['form'], ExistingListItemForm)
+        self.assertIsInstance(response.context['form'], NewItemWithExistingListForm)
 
     def test_for_invalid_input_shows_error_on_page(self):
         response = self.post_invalid_input()
@@ -114,7 +114,7 @@ class ListViewTest(TestCase):
     def test_displays_item_form(self):
         list_ = List.objects.create()
         response = self.client.get(f'/lists/{list_.id}/')
-        self.assertIsInstance(response.context['form'], ExistingListItemForm)
+        self.assertIsInstance(response.context['form'], NewItemWithExistingListForm)
         self.assertContains(response, 'name="text"')
 
     def test_displays_sharing_form(self):
@@ -324,6 +324,21 @@ class ShareTest(unittest.TestCase):
         form = MockSharingForm()
         mock_redirect.assert_called_once_with(form.save.return_value)
         self.assertEqual(response, mock_redirect.return_value)
+
+    
+    # @patch('lists.views.SharingForm')
+    # @patch('lists.views.redirect')
+    # def test_on_errors_redirects_to_list(self,  mock_redirect, MockSharingForm):
+    #     form = MockSharingForm()
+    #     list_id = 1234
+    #     self.request.POST['sharee'] = 'a@b.com'
+
+    #     form.is_valid.return_value = False
+    #     response = share(self.request, list_id)
+
+    #     mock_redirect.assert_called_once_with(form.save.return_value)
+    #     self.assertEqual(response, mock_redirect.return_value)
+
 
 
 class ShareIntegratedTest(TestCase):

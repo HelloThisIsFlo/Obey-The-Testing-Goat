@@ -21,7 +21,11 @@ class ItemForm(forms.models.ModelForm):
         }
 
 
-class ExistingListItemForm(ItemForm):
+class NewItemWithExistingListForm(ItemForm):
+    def __init__(self, list_=None, data=None):
+        super().__init__(data=data)
+        self.instance.list = list_
+
     def clean(self):
         is_duplicate = Item.objects.filter(
             list=self.instance.list, text=self.cleaned_data.get('text', '')
@@ -61,4 +65,4 @@ class SharingForm(forms.Form):
     def save(self):
         list_ = List.objects.get(id=self.list_id)
         list_.add_sharee(email=self.cleaned_data['sharee'])
-        return  list_
+        return list_

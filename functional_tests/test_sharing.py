@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from .base import FunctionalTest
 
 
@@ -60,3 +61,32 @@ class SharingTest(FunctionalTest):
         self.browser = edith_browser
         self.browser.refresh()
         self.pages.list.wait_for_row_in_list_table('Hi Edith!', 2)
+
+    def test_can_not_share_with_non_existing_user(self):
+        # Frank is an existing user
+        self.init_pre_authenticated_session('frank@example.com')
+
+        # Edith is a logged-in user
+        self.init_pre_authenticated_session('edith@example.com')
+
+        # She goes to the home page and starts a list
+        self.pages.home\
+            .go()\
+            .add_list_item('Get help')
+
+        # She tries to share her list with a non-existing user
+        self.pages.list.get_share_box().send_keys('does-not-exist@example.com')
+        self.pages.list.get_share_box().send_keys(Keys.ENTER)
+
+        # She sees an error message
+        self.wait_for(lambda: self.assertContains(
+            self.pages.list.get_error_element().text,
+            "This user doesn't exist"
+        ))
+
+        # She now tries to share her list with frank, and it works
+        self.pages.list.get_share_box().clear()
+        self.pages.list.share_list_with('frank@example.com')
+
+    def test_can_only_share_if_list_owner(self):
+        pass

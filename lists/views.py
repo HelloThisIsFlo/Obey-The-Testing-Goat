@@ -4,9 +4,29 @@ from django.core.exceptions import ValidationError
 from textwrap import dedent
 
 from lists.models import Item, List
-from lists.forms import ExistingListItemForm, NewListFromItemForm, SharingForm
+from lists.forms import NewItemWithExistingListForm, NewListFromItemForm, SharingForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
+
+
+def _authorized_to_access_list(user, list_):
+    is_public_list = not list_.owner
+    if is_public_list:
+        return True
+
+    if not user.is_authenticated:
+        return False
+
+    if list_.owner == user:
+        return True
+
+    list_shared_with_logged_in_user = list_.sharees.filter(
+        email=user.email
+    ).exists()
+    if list_shared_with_logged_in_user:
+        return True
+
+    return False
 
 
 def home_page(request):
@@ -14,39 +34,45 @@ def home_page(request):
 
 
 def view_list(request, list_id):
-    def authorized():
-        is_public_list = not list_.owner
-        if is_public_list:
-            return True
+    def is_new_item_form():
+        return 'text' in request.POST
 
-        if not request.user.is_authenticated:
-            return False
+    def render_view_list(new_item_form=None, sharing_form=None):
+        if not new_item_form:
+            new_item_form = NewItemWithExistingListForm()
 
-        if list_.owner == request.user:
-            return True
+        if not sharing_form:
+            sharing_form = SharingForm()
 
-        list_shared_with_logged_in_user = list_.sharees.filter(
-            email=request.user.email
-        ).exists()
-        if list_shared_with_logged_in_user:
-            return True
+        return render(
+            request,
+            'list.html',
+            {'list': list_, 'form': new_item_form, 'sharing_form': sharing_form}
+        )
 
-        return False
+    def handle_new_item_form(list_):
+        new_item_form = NewItemWithExistingListForm(list_=list_, data=request.POST)
+        if new_item_form.is_valid():
+            new_item_form.save()
+            return redirect(list_)
+
+        return render_view_list(new_item_form=new_item_form)
+
+    def handle_sharing_form(list_):
+        raise 'not implemented'
 
     list_ = List.objects.get(id=list_id)
 
-    if not authorized():
+    if not _authorized_to_access_list(request.user, list_):
         raise Http404()
 
-    item = Item(list=list_)
-    form = ExistingListItemForm()
     if request.method == 'POST':
-        form = ExistingListItemForm(instance=item, data=request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(list_)
-
-    return render(request, 'list.html', {'list': list_, 'form': form, 'sharing_form': SharingForm()})
+        if is_new_item_form():
+            return handle_new_item_form(list_)
+        else:
+            return handle_sharing_form(list_)
+    else:
+        return render_view_list()
 
 
 def new_list(request):

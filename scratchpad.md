@@ -60,8 +60,6 @@ Before going w/ the 'Sharing' model way, explore 'ManyToMany' in Spike
   [x] Creates a SharingForm & call save (no is_valid for now)
   [x] Redirects to list
 
----- Can implement until here, then think a bit more
-
 [x] SharingForm
   [x] placeholder: "your-friend@example.com"
   [x] Takes list_id & data['email'] in init
@@ -72,3 +70,13 @@ Before going w/ the 'Sharing' model way, explore 'ManyToMany' in Spike
 [x] `list_.add_sharee(email=...)` - Non-mocked tests
   [x] Adds sharee
       (This will test it saves, but also that it 'can' save a list of sharee)
+
+
+
+------------------------
+[ ] Share on error 
+  [ ] Adds form to session
+  [ ] Redirects to list
+
+[ ] view_list
+  [ ] Renders existing form from session if present
