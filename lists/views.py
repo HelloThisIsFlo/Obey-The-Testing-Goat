@@ -59,7 +59,10 @@ def view_list(request, list_id):
         return render_view_list(list_, new_item_form=new_item_form)
 
     def handle_sharing_form(list_):
-        raise 'not implemented'
+        sharing_form = SharingForm(list_=list_, data=request.POST)
+        sharing_form.is_valid()
+        sharing_form.save()
+        return redirect(list_)
 
     list_ = List.objects.get(id=list_id)
 
@@ -101,11 +104,3 @@ def my_lists(request, user_email):
 
     owner = User.objects.get(email=user_email)
     return render(request, 'my_lists.html', {'owner': owner})
-
-
-def share(request, list_id):
-    list_ = List.objects.get(id=list_id)
-    sharing_form = SharingForm(list_=list_, data=request.POST)
-    sharing_form.is_valid()
-    updated_list = sharing_form.save()
-    return redirect(updated_list)

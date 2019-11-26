@@ -22,7 +22,7 @@
 <h4>Owner: <span id="id_list_owner">{{ list.owner.email }}</span></h4>
 <hr />
 <h3>Share this list</h3>
-<form action="{{ list.get_absolute_url }}share" method="post">
+<form action="{{ list.get_absolute_url }}" method="post">
   {% csrf_token %}
   {{ sharing_form }}
 </form>

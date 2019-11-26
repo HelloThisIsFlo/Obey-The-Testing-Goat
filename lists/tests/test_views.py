@@ -2,7 +2,7 @@ from unittest.mock import patch, ANY
 import unittest
 from lists.forms import NewItemWithExistingListForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm, SharingForm
 from lists.models import Item, List
-from lists.views import home_page, my_lists, new_list, share, view_list
+from lists.views import home_page, my_lists, new_list, view_list
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest, Http404
@@ -154,41 +154,73 @@ class ListViewIntegratedTest(TestCase):
         self.assertContains(response, 'First list item', status_code=200)
 
 
-# class ListViewSharingTest(unittest.TestCase):
-#     def setUp(self):
-#         self.request = HttpRequest()
+@patch('lists.views.List')
+@patch('lists.views.SharingForm')
+@patch('lists.views.redirect')
+@patch('lists.views.render')
+class ListViewSharingTest(unittest.TestCase):
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.method = 'POST'
+        self.request.user = AnonymousUser()
 
-#     @patch('lists.views.SharingForm')
-#     @patch('lists.views.redirect')
-#     def test_after_share_POST_call_is_valid_and_then_saves_the_form(self,  mock_redirect, MockSharingForm):
-#         def assert_is_valid_was_called():
-#             form.is_valid.assert_called_once()
+    def test_after_share_POST_get_list_with_id(self, mock_render, mock_redirect, MockSharingForm, MockList):
+        list_ = MockList.objects.get.return_value
+        list_.owner = None
+        list_id = 1234
+        self.request.POST['sharee'] = 'a@b.com'
 
-#         form = MockSharingForm()
-#         MockSharingForm.reset_mock()
-#         list_id = 1234
-#         self.request.POST['sharee'] = 'a@b.com'
+        response = view_list(self.request, list_id)
 
-#         form.save.side_effect = assert_is_valid_was_called
-#         response = view_list(self.request, list_id)
+        MockList.objects.get.assert_called_once_with(id=list_id)
 
-#         MockSharingForm.assert_called_once_with(
-#             list_id=1234,
-#             data=self.request.POST
-#         )
-#         form.save.assert_called_once()
+    def test_after_share_POST_call_is_valid_and_then_saves_the_form(self, mock_render, mock_redirect, MockSharingForm, MockList):
+        def assert_is_valid_was_called():
+            form.is_valid.assert_called_once()
 
-#     @patch('lists.views.SharingForm')
-#     @patch('lists.views.redirect')
-#     def test_after_share_POST_redirects_to_list(self,  mock_redirect, MockSharingForm):
-#         list_id = 1234
-#         self.request.POST['sharee'] = 'a@b.com'
+        form = MockSharingForm.return_value
+        list_ = MockList.objects.get.return_value
+        list_.owner = None
+        list_id = 1234
+        self.request.POST['sharee'] = 'a@b.com'
+        form.save.side_effect = assert_is_valid_was_called
 
-#         response = view_list(self.request, list_id)
+        response = view_list(self.request, list_id)
 
-#         form = MockSharingForm()
-#         mock_redirect.assert_called_once_with(form.save.return_value)
-#         self.assertEqual(response, mock_redirect.return_value)
+        MockSharingForm.assert_called_once_with(
+            list_=MockList.objects.get.return_value,
+            data=self.request.POST
+        )
+        form.save.assert_called_once()
+
+    def test_after_share_POST_redirects_to_list(self, mock_render, mock_redirect, MockSharingForm, MockList):
+        list_ = MockList.objects.get.return_value
+        list_.owner = None
+        list_id = 1234
+        self.request.POST['sharee'] = 'a@b.com'
+
+        response = view_list(self.request, list_id)
+
+        form = MockSharingForm.return_value
+        mock_redirect.assert_called_once_with(list_)
+        self.assertEqual(response, mock_redirect.return_value)
+
+
+class ListViewSharingIntegratedTest(TestCase):
+    def test_add_sharee(self):
+        edith = User.objects.create(email='edith@example.com')
+        frank = User.objects.create(email='frank@example.com')
+
+        list_ = List.create_new(first_item_text="Edith's list", owner=edith)
+
+        self.client.force_login(edith)
+        self.client.post(
+            f'/lists/{list_.id}/',
+            {'sharee': 'frank@example.com'}
+        )
+
+        saved_list = List.objects.first()
+        self.assertEqual(saved_list.sharees.first(), frank)
 
 
 @patch('lists.views.NewListFromItemForm')
@@ -326,69 +358,3 @@ class MyListsIntegratedTest(TestCase):
 
         self.assertContains(response, 'First item from first list')
         self.assertContains(response, 'First item from second list')
-
-
-class ShareTest(unittest.TestCase):
-    def setUp(self):
-        self.request = HttpRequest()
-
-    @patch('lists.views.List')
-    @patch('lists.views.SharingForm')
-    @patch('lists.views.redirect')
-    def test_get_list_with_id(self,  mock_redirect, MockSharingForm, MockList):
-        list_id = 1234
-        self.request.POST['sharee'] = 'a@b.com'
-
-        response = share(self.request, list_id)
-
-        MockList.objects.get.assert_called_once_with(id=list_id)
-
-    @patch('lists.views.List')
-    @patch('lists.views.SharingForm')
-    @patch('lists.views.redirect')
-    def test_call_is_valid_and_then_saves_the_form(self,  mock_redirect, MockSharingForm, MockList):
-        def assert_is_valid_was_called():
-            form.is_valid.assert_called_once()
-
-        form = MockSharingForm()
-        MockSharingForm.reset_mock()
-        list_id = 1234
-        self.request.POST['sharee'] = 'a@b.com'
-        form.save.side_effect = assert_is_valid_was_called
-
-        response = share(self.request, list_id)
-
-        MockSharingForm.assert_called_once_with(
-            list_=MockList.objects.get.return_value,
-            data=self.request.POST
-        )
-        form.save.assert_called_once()
-
-    @patch('lists.views.List')
-    @patch('lists.views.SharingForm')
-    @patch('lists.views.redirect')
-    def test_redirects_to_list(self,  mock_redirect, MockSharingForm, MockList):
-        list_id = 1234
-        self.request.POST['sharee'] = 'a@b.com'
-
-        response = share(self.request, list_id)
-
-        form = MockSharingForm()
-        mock_redirect.assert_called_once_with(form.save.return_value)
-        self.assertEqual(response, mock_redirect.return_value)
-
-
-class ShareIntegratedTest(TestCase):
-    def test_add_sharee(self):
-        edith = User.objects.create(email='edith@example.com')
-        frank = User.objects.create(email='frank@example.com')
-
-        list_ = List.create_new(first_item_text="Edith's list", owner=edith)
-
-        self.client.post(
-            f'/lists/{list_.id}/share',
-            {'sharee': 'frank@example.com'}
-        )
-
-        saved_list = List.objects.first()
-        self.assertEqual(saved_list.sharees.first(), frank)
