@@ -1,3 +1,8 @@
+from unittest.mock import patch
+import unittest
+from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
+from lists.models import Item, List
+from lists.views import home_page, my_lists, new_list2
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest
@@ -5,13 +10,6 @@ from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.contrib.auth import get_user_model
 User = get_user_model()
-
-
-from lists.views import home_page, my_lists
-from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
-import unittest
-from unittest.mock import patch
 
 
 class HomePageTest(TestCase):
@@ -119,7 +117,7 @@ class ListViewTest(TestCase):
         self.assertContains(response, 'name="text"')
 
 
-class NewListTest(TestCase):
+class NewListIntegratedTest(TestCase):
     def test_can_save_a_POST_request(self):
         response = self.client.post(
             '/lists/new',
@@ -154,6 +152,101 @@ class NewListTest(TestCase):
         self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
+
+
+@patch('lists.views.redirect')
+@patch('lists.views.NewListFromItemForm')
+class NewListTest(unittest.TestCase):
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.POST['text'] = 'TEXT'
+
+    # @patch('lists.views.List')
+    # @patch('lists.views.Item')
+    # @patch('lists.views.ItemForm')
+    # @patch('lists.views.redirect')
+    # def test_valid_data__create_new_list(
+    #     self,
+    #     MockList,
+    #     MockItem,
+    #     MockItemForm,
+    #     mock_redirect
+    # ):
+    #     form = MockItemForm.return_value
+    #     self.request.POST['text'] = 'A new list item'
+
+    #     new_list2(self.request)
+
+    #     MockList.objects.create.assert_called_once()
+    #     MockItem.assert_called_once_with(
+    #         list=MockList.objects.create.return_value
+    #     )
+    #     MockItemForm.assert_called_once_with(
+    #         instance=MockItem.return_value,
+    #         data=self.request.POST
+    #     )
+    #     form.is_valid.assert_called_once()
+    #     form.save.assert_called_once()
+
+    def test_valid_data__create_new_list(
+        self,
+        MockNewListFromItemForm,
+        mock_redirect
+    ):
+        self.request.POST['text'] = 'A new list item'
+
+        new_list2(self.request)
+
+        MockNewListFromItemForm.assert_called_once_with(
+            first_list_item='A new list item')
+        form = MockNewListFromItemForm.return_value
+        form.is_valid.assert_called_once()
+        form.save.assert_called_once()
+
+    def test_valid_data__redirects_to_new_list(
+        self,
+        MockNewListFromItemForm,
+        mock_redirect
+    ):
+        response = new_list2(self.request)
+
+        form = MockNewListFromItemForm.return_value
+        newly_created_list = form.saved_list
+        mock_redirect.assert_called_once_with(newly_created_list)
+        self.assertEqual(response, mock_redirect.return_value)
+
+
+    @patch('lists.views.render')
+    def test_invalid_data__renders_home_template_with_form_containing_errors(
+        self,
+        mock_render,
+        MockNewListFromItemForm,
+        mock_redirect
+    ):
+        form_with_errors = MockNewListFromItemForm.return_value
+        form_with_errors.is_valid.return_value = False
+
+        response = new_list2(self.request)
+
+        mock_render.assert_called_once_with(self.request, 'home.html', {'form': form_with_errors})
+        self.assertEqual(response, mock_render.return_value)
+
+    def test_invalid_data__form_is_not_saved(
+        self,
+        MockNewListFromItemForm,
+        mock_redirect
+    ):
+        form_with_errors = MockNewListFromItemForm.return_value
+        form_with_errors.is_valid.return_value = False
+
+        new_list2(self.request)
+
+        form_with_errors.save.assert_not_called()
+
+        # def test_invalid_list_items_arent_saved(self):
+        #     self.client.post('/lists/new', data={'text': ''})
+        #     self.assertEqual(Item.objects.count(), 0)
+        #     self.assertEqual(List.objects.count(), 0)
 
 
 class MyListsTest(unittest.TestCase):

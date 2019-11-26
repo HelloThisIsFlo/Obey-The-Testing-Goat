@@ -44,3 +44,12 @@
 [ ] `List` model
   [ ] has `name` attribute
   [ ] has a `User` ForeignKey
+
+[ ] `new_list` view
+  [ ] If logged in, create new list with owner
+
+[ ] `NewListFromItemForm` 
+  [ ] `__init__` takes `first_list_item`
+  [ ] `save` creates a new list, adds the item and save to the DB
+  [ ] `saved_list` returns the saved list
+  [ ] Invalid form contains errors
