@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+<!---->
+{% block header_text %}My lists{% endblock %}
+
+<!---->
+{% block new_item_form %}{% endblock %}
+
+<!---->
+{% block extra_content %}
+<ul>
+  {% for list in owner.list_set.all %}
+  <li>{{ list.name }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

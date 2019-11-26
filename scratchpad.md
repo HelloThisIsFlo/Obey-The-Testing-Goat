@@ -18,3 +18,29 @@
 
 [ ] Make 'uid' in Token non-editable
 [x] Clean up `wait_for` stuff in `base.py`
+
+
+[ ] Save the owner on the List
+[ ] Retrieve the lists for a specific owner
+
+
+
+1) Add owner to list
+2) Save owner when saving list
+3) Add endpoint for retrieving list for logged-in user
+4) Display on the page
+
+
+[x] 1) Display on the page
+[x] 2) Add endpoint for retrieving list for logged-in user
+[ ] 3) Save owner when saving list
+[ ] 4) Add owner to list
+
+
+------------------------
+[x] `my_lists` view
+  [x] passes the logged in user as 'owner'
+
+[ ] `List` model
+  [ ] has `name` attribute
+  [ ] has a `User` ForeignKey

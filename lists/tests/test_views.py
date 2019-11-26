@@ -3,10 +3,15 @@ from django.urls import resolve
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.html import escape
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
-from lists.views import home_page
+
+from lists.views import home_page, my_lists
 from lists.models import Item, List
 from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
+import unittest
+from unittest.mock import patch
 
 
 class HomePageTest(TestCase):
@@ -149,3 +154,27 @@ class NewListTest(TestCase):
         self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
+
+
+class MyListsTest(unittest.TestCase):
+    def setUp(self):
+        self.request = HttpRequest()
+        self.logged_in_user = User(email='frank@example.com')
+        self.request.user = self.logged_in_user
+
+    @patch('lists.views.render')
+    def test_renders_the_my_lists_template(self, mock_render):
+        response = my_lists(self.request)
+
+        mock_render.assert_called_once()
+        ((request, template_used, __), ___) = mock_render.call_args
+        self.assertEqual(response, mock_render.return_value)
+        self.assertEqual(template_used, 'my_lists.html')
+        self.assertEqual(request, self.request)
+
+    @patch('lists.views.render')
+    def test_pass_the_logged_in_user_to_template(self, mock_render):
+        response = my_lists(self.request)
+
+        ((_, __, context), ___) = mock_render.call_args
+        self.assertEqual(context['owner'], self.logged_in_user)
