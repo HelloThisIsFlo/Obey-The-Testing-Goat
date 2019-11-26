@@ -37,7 +37,7 @@ def view_list(request, list_id):
     def is_new_item_form():
         return 'text' in request.POST
 
-    def render_view_list(new_item_form=None, sharing_form=None):
+    def render_view_list(list_, new_item_form=None, sharing_form=None):
         if not new_item_form:
             new_item_form = NewItemWithExistingListForm()
 
@@ -56,7 +56,7 @@ def view_list(request, list_id):
             new_item_form.save()
             return redirect(list_)
 
-        return render_view_list(new_item_form=new_item_form)
+        return render_view_list(list_, new_item_form=new_item_form)
 
     def handle_sharing_form(list_):
         raise 'not implemented'
@@ -72,7 +72,7 @@ def view_list(request, list_id):
         else:
             return handle_sharing_form(list_)
     else:
-        return render_view_list()
+        return render_view_list(list_)
 
 
 def new_list(request):
@@ -104,7 +104,8 @@ def my_lists(request, user_email):
 
 
 def share(request, list_id):
-    sharing_form = SharingForm(list_id=list_id, data=request.POST)
+    list_ = List.objects.get(id=list_id)
+    sharing_form = SharingForm(list_=list_, data=request.POST)
     sharing_form.is_valid()
     updated_list = sharing_form.save()
     return redirect(updated_list)

@@ -58,11 +58,10 @@ class SharingForm(forms.Form):
         }
     ))
 
-    def __init__(self, list_id=None, data=None):
-        self.list_id = list_id
+    def __init__(self, list_=None, data=None):
+        self.list_ = list_
         super().__init__(data=data)
 
     def save(self):
-        list_ = List.objects.get(id=self.list_id)
-        list_.add_sharee(email=self.cleaned_data['sharee'])
-        return list_
+        self.list_.add_sharee(email=self.cleaned_data['sharee'])
+        return self.list_

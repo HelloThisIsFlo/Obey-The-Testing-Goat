@@ -2,7 +2,7 @@ from unittest.mock import patch, ANY
 import unittest
 from lists.forms import NewItemWithExistingListForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm, SharingForm
 from lists.models import Item, List
-from lists.views import home_page, my_lists, new_list, share
+from lists.views import home_page, my_lists, new_list, share, view_list
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest, Http404
@@ -23,7 +23,7 @@ class HomePageTest(TestCase):
         self.assertIsInstance(response.context['form'], NewListFromItemForm)
 
 
-class ListViewTest(TestCase):
+class ListViewIntegratedTest(TestCase):
     def post_invalid_input(self):
         list_ = List.objects.create()
         return self.client.post(
@@ -96,7 +96,8 @@ class ListViewTest(TestCase):
 
     def test_for_invalid_input_passes_form_to_template(self):
         response = self.post_invalid_input()
-        self.assertIsInstance(response.context['form'], NewItemWithExistingListForm)
+        self.assertIsInstance(
+            response.context['form'], NewItemWithExistingListForm)
 
     def test_for_invalid_input_shows_error_on_page(self):
         response = self.post_invalid_input()
@@ -114,7 +115,8 @@ class ListViewTest(TestCase):
     def test_displays_item_form(self):
         list_ = List.objects.create()
         response = self.client.get(f'/lists/{list_.id}/')
-        self.assertIsInstance(response.context['form'], NewItemWithExistingListForm)
+        self.assertIsInstance(
+            response.context['form'], NewItemWithExistingListForm)
         self.assertContains(response, 'name="text"')
 
     def test_displays_sharing_form(self):
@@ -150,6 +152,43 @@ class ListViewTest(TestCase):
         response = self.client.get(list_.get_absolute_url(), follow=True)
 
         self.assertContains(response, 'First list item', status_code=200)
+
+
+# class ListViewSharingTest(unittest.TestCase):
+#     def setUp(self):
+#         self.request = HttpRequest()
+
+#     @patch('lists.views.SharingForm')
+#     @patch('lists.views.redirect')
+#     def test_after_share_POST_call_is_valid_and_then_saves_the_form(self,  mock_redirect, MockSharingForm):
+#         def assert_is_valid_was_called():
+#             form.is_valid.assert_called_once()
+
+#         form = MockSharingForm()
+#         MockSharingForm.reset_mock()
+#         list_id = 1234
+#         self.request.POST['sharee'] = 'a@b.com'
+
+#         form.save.side_effect = assert_is_valid_was_called
+#         response = view_list(self.request, list_id)
+
+#         MockSharingForm.assert_called_once_with(
+#             list_id=1234,
+#             data=self.request.POST
+#         )
+#         form.save.assert_called_once()
+
+#     @patch('lists.views.SharingForm')
+#     @patch('lists.views.redirect')
+#     def test_after_share_POST_redirects_to_list(self,  mock_redirect, MockSharingForm):
+#         list_id = 1234
+#         self.request.POST['sharee'] = 'a@b.com'
+
+#         response = view_list(self.request, list_id)
+
+#         form = MockSharingForm()
+#         mock_redirect.assert_called_once_with(form.save.return_value)
+#         self.assertEqual(response, mock_redirect.return_value)
 
 
 @patch('lists.views.NewListFromItemForm')
@@ -293,9 +332,21 @@ class ShareTest(unittest.TestCase):
     def setUp(self):
         self.request = HttpRequest()
 
+    @patch('lists.views.List')
     @patch('lists.views.SharingForm')
     @patch('lists.views.redirect')
-    def test_call_is_valid_and_then_saves_the_form(self,  mock_redirect, MockSharingForm):
+    def test_get_list_with_id(self,  mock_redirect, MockSharingForm, MockList):
+        list_id = 1234
+        self.request.POST['sharee'] = 'a@b.com'
+
+        response = share(self.request, list_id)
+
+        MockList.objects.get.assert_called_once_with(id=list_id)
+
+    @patch('lists.views.List')
+    @patch('lists.views.SharingForm')
+    @patch('lists.views.redirect')
+    def test_call_is_valid_and_then_saves_the_form(self,  mock_redirect, MockSharingForm, MockList):
         def assert_is_valid_was_called():
             form.is_valid.assert_called_once()
 
@@ -308,14 +359,15 @@ class ShareTest(unittest.TestCase):
         response = share(self.request, list_id)
 
         MockSharingForm.assert_called_once_with(
-            list_id=1234,
+            list_=MockList.objects.get.return_value,
             data=self.request.POST
         )
         form.save.assert_called_once()
 
+    @patch('lists.views.List')
     @patch('lists.views.SharingForm')
     @patch('lists.views.redirect')
-    def test_redirects_to_list(self,  mock_redirect, MockSharingForm):
+    def test_redirects_to_list(self,  mock_redirect, MockSharingForm, MockList):
         list_id = 1234
         self.request.POST['sharee'] = 'a@b.com'
 
@@ -324,21 +376,6 @@ class ShareTest(unittest.TestCase):
         form = MockSharingForm()
         mock_redirect.assert_called_once_with(form.save.return_value)
         self.assertEqual(response, mock_redirect.return_value)
-
-    
-    # @patch('lists.views.SharingForm')
-    # @patch('lists.views.redirect')
-    # def test_on_errors_redirects_to_list(self,  mock_redirect, MockSharingForm):
-    #     form = MockSharingForm()
-    #     list_id = 1234
-    #     self.request.POST['sharee'] = 'a@b.com'
-
-    #     form.is_valid.return_value = False
-    #     response = share(self.request, list_id)
-
-    #     mock_redirect.assert_called_once_with(form.save.return_value)
-    #     self.assertEqual(response, mock_redirect.return_value)
-
 
 
 class ShareIntegratedTest(TestCase):

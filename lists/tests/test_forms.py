@@ -101,22 +101,22 @@ class SharingFormTest(unittest.TestCase):
         self.assertIn('class="form-control input', form.as_p())
 
     @patch('lists.forms.List')
-    def test_fetches_list_and_add_sharee_on_save(self, MockList):
-        form = SharingForm(list_id=1234, data={'sharee': 'a@b.com'})
+    def test_adds_sharee_on_save(self, MockList):
+        list_ = MockList()
+
+        form = SharingForm(list_=list_, data={'sharee': 'a@b.com'})
 
         form.is_valid() # populate 'cleaned_data'
         form.save()
 
-        MockList.objects.get.assert_called_once_with(id=1234)
-        list_ = MockList.objects.get.return_value
         list_.add_sharee.assert_called_once_with(email='a@b.com')
 
     @patch('lists.forms.List')
     def test_returns_updated_list_on_save(self, MockList):
-        form = SharingForm(list_id=1234, data={'sharee': 'a@b.com'})
+        list_ = MockList()
+        form = SharingForm(list_=list_, data={'sharee': 'a@b.com'})
 
         form.is_valid() # populate 'cleaned_data'
         resp = form.save()
 
-        list_ = MockList.objects.get.return_value
         self.assertEqual(resp, list_)
