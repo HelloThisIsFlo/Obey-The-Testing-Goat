@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewItemWithExistingListForm, NewListFromItemForm, SharingForm
+from lists.forms import EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, USER_DOESNT_EXIST_ERROR, NewItemWithExistingListForm, NewListFromItemForm, SharingForm
 from lists.models import List, Item
 import unittest
 from unittest.mock import patch, MagicMock
@@ -48,7 +48,8 @@ class ItemFormTest(TestCase):
         list_ = List.objects.create()
         Item.objects.create(list=list_, text='duplicate')
 
-        form = NewItemWithExistingListForm(list_=list_, data={'text': 'duplicate'})
+        form = NewItemWithExistingListForm(
+            list_=list_, data={'text': 'duplicate'})
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])
@@ -94,29 +95,36 @@ class NewListFromItemFormTest(unittest.TestCase):
         self.assertFalse(form.is_valid())
 
 
+@patch('lists.forms.User')
 class SharingFormTest(unittest.TestCase):
-    def test_form_item_input_has_placeholder_and_css_classes(self):
+    def test_form_item_input_has_placeholder_and_css_classes(self, MockUser):
         form = SharingForm()
         self.assertIn('placeholder="your-friend@example.com"', form.as_p())
         self.assertIn('class="form-control input', form.as_p())
 
-    @patch('lists.forms.List')
-    def test_adds_sharee_on_save(self, MockList):
-        list_ = MockList()
+    def test_adds_sharee_on_save(self, MockUser):
+        list_ = MagicMock()
 
         form = SharingForm(list_=list_, data={'sharee': 'a@b.com'})
 
-        form.is_valid() # populate 'cleaned_data'
+        form.is_valid()  # populate 'cleaned_data'
         form.save()
 
         list_.add_sharee.assert_called_once_with(email='a@b.com')
 
-    @patch('lists.forms.List')
-    def test_returns_updated_list_on_save(self, MockList):
-        list_ = MockList()
-        form = SharingForm(list_=list_, data={'sharee': 'a@b.com'})
+    def test_valid_form(self, MockUser):
+        MockUser.exists.return_value = True
 
-        form.is_valid() # populate 'cleaned_data'
-        resp = form.save()
+        form = SharingForm(list_=MagicMock(), data={'sharee': 'a@b.com'})
 
-        self.assertEqual(resp, list_)
+        self.assertTrue(form.is_valid())
+        MockUser.exists.assert_called_once_with(email='a@b.com')
+
+    def test_invalid_form__user_doesnt_exist(self, MockUser):
+        MockUser.exists.return_value = False
+
+        form = SharingForm(list_=MagicMock(), data={'sharee': 'a@b.com'})
+
+        self.assertFalse(form.is_valid())
+        MockUser.exists.assert_called_once_with(email='a@b.com')
+        self.assertIn(USER_DOESNT_EXIST_ERROR, form['sharee'].errors)

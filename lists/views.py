@@ -55,14 +55,17 @@ def view_list(request, list_id):
         if new_item_form.is_valid():
             new_item_form.save()
             return redirect(list_)
-
-        return render_view_list(list_, new_item_form=new_item_form)
+        else:
+            return render_view_list(list_, new_item_form=new_item_form)
 
     def handle_sharing_form(list_):
         sharing_form = SharingForm(list_=list_, data=request.POST)
-        sharing_form.is_valid()
-        sharing_form.save()
-        return redirect(list_)
+        if sharing_form.is_valid():
+            sharing_form.save()
+            return redirect(list_)
+        else:
+            return render_view_list(list_, sharing_form=sharing_form)
+
 
     list_ = List.objects.get(id=list_id)
 

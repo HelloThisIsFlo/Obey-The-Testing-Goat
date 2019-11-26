@@ -12,6 +12,10 @@ class User(models.Model):
     is_anonymous = False
     is_authenticated = True
 
+    @staticmethod
+    def exists(email):
+        return User.objects.filter(email=email).exists()
+
 
 class Token(models.Model):
     email = models.EmailField()

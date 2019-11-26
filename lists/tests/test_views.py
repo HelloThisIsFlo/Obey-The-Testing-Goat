@@ -205,6 +205,25 @@ class ListViewSharingTest(unittest.TestCase):
         mock_redirect.assert_called_once_with(list_)
         self.assertEqual(response, mock_redirect.return_value)
 
+    def test_after_share_POST_invalid_render_list_view_with_sharing_form_with_erros(self, mock_render, mock_redirect, MockSharingForm, MockList):
+        form = MockSharingForm.return_value
+        list_ = MockList.objects.get.return_value
+        list_.owner = None
+        list_id = 1234
+        self.request.POST['sharee'] = 'a@b.com'
+
+        form.is_valid.return_value = False
+        response = view_list(self.request, list_id)
+
+        MockSharingForm.assert_called_once_with(
+            list_=MockList.objects.get.return_value,
+            data=self.request.POST
+        )
+        mock_render.assert_called_once()
+        ((_, __, context), ___) = mock_render.call_args
+        self.assertEqual(context['sharing_form'], form)
+        self.assertEqual(response, mock_render.return_value)
+
 
 class ListViewSharingIntegratedTest(TestCase):
     def test_add_sharee(self):
