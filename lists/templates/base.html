@@ -64,7 +64,7 @@
           <div class="text-center">
             <h1>{% block header_text %}{% endblock %}</h1>
             {% block item_form %}
-            <form method="POST" action="{% block form_action %}{% endblock %}">
+            <form id="id_item_form" method="POST" action="{% block form_action %}{% endblock %}">
               {% csrf_token %}
               <!-- This renders the HTML input for the 'text' field of 'Item' -->
               {{ form.text }}

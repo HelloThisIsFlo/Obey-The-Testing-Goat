@@ -1,12 +1,5 @@
 window.Superlists = {};
-window.Superlists.initialize = function(url) {
-  function hideError() {
-    $(".has-error").hide();
-  }
-
-  $('input[name="text"]').on("keypress", hideError);
-  $('input[name="text"]').on("click", hideError);
-
+window.Superlists.updateItems = function(url) {
   $.get(url).done(function(response) {
     function buildRow(index, text) {
       return `<tr><td>${index}: ${text}</td></tr>`;
@@ -16,7 +9,30 @@ window.Superlists.initialize = function(url) {
     response
       .map((item, index) => buildRow(index + 1, item.text))
       .forEach(row => rows.push(row));
-    
-    $('#id_list_table').html(rows)
+
+    $("#id_list_table").html(rows);
+  });
+};
+window.Superlists.initialize = function(url) {
+  function hideError() {
+    $(".has-error").hide();
+  }
+
+  $('input[name="text"]').on("keypress", hideError);
+  $('input[name="text"]').on("click", hideError);
+
+  if (url) {
+    window.Superlists.updateItems(url)
+  }
+
+  const form = $("#id_item_form");
+  form.on("submit", function(event) {
+    event.preventDefault();
+    $.post(url, {
+      text: form.find('input[name="text"]').val(),
+      csrfmiddlewaretoken: form.find('input[name="csrfmiddlewaretoken"]').val()
+    }).done(function(response) {
+      window.Superlists.updateItems(url)
+    });
   });
 };
