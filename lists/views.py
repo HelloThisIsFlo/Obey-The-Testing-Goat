@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
-from django.views.generic import FormView
+from django.views.generic import FormView, CreateView
 from textwrap import dedent
 
 from lists.models import Item, List
@@ -13,9 +13,6 @@ User = get_user_model()
 class HomePageView(FormView):
     template_name = 'home.html'
     form_class = NewListFromItemForm
-
-def home_page(request):
-    return render(request, 'home.html', {'form': NewListFromItemForm()})
 
 
 def view_list(request, list_id):
@@ -31,17 +28,22 @@ def view_list(request, list_id):
     return render(request, 'list.html', {'list': list_, 'form': form})
 
 
-def new_list(request):
-    if request.user.is_authenticated:
-        form = NewListFromItemForm(data=request.POST, owner=request.user)
-    else:
-        form = NewListFromItemForm(data=request.POST)
+class NewListView(CreateView):
+    form_class = NewListFromItemForm
+    template_name = 'home.html'
 
-    if form.is_valid():
-        saved_list = form.save()
-        return redirect(saved_list)
-    else:
-        return render(request, 'home.html', {'form': form})
+    def get_form_kwargs(self):
+        if self.request.user.is_authenticated:
+            return {'data': self.request.POST, 'owner': self.request.user}
+        else:
+            return {'data': self.request.POST}
+
+    def form_valid(self, form):
+        list_ = form.save()
+        return redirect(list_)
+
+    def form_invalid(self, form):
+        return render(self.request, 'home.html', {'form': form})
 
 
 def my_lists(request, user_email):

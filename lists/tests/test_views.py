@@ -1,8 +1,8 @@
-from unittest.mock import patch, ANY
+from unittest.mock import patch, ANY, MagicMock
 import unittest
 from lists.forms import ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, NewListFromItemForm
 from lists.models import Item, List
-from lists.views import home_page, my_lists, new_list
+from lists.views import my_lists, NewListView
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest
@@ -118,36 +118,49 @@ class ListViewTest(TestCase):
         self.assertContains(response, 'name="text"')
 
 
-@patch('lists.views.NewListFromItemForm')
 class NewListTest(unittest.TestCase):
     def setUp(self):
+        self.original_form_class = NewListView.form_class
+
+        self.MockNewListFromItemForm = MagicMock(NewListFromItemForm)
+        NewListView.form_class = self.MockNewListFromItemForm
+        self.new_list = NewListView.as_view()
+
         self.request = HttpRequest()
         self.request.user = AnonymousUser()
         self.request.POST['text'] = 'some text'
+        self.request.method = 'POST'
 
-    def test_can_save_a_POST_request(self, MockNewListFromItemForm):
-        new_list(self.request)
+    def tearDown(self):
+        NewListView.form_class = self.original_form_class
 
-        MockNewListFromItemForm.assert_called_once_with(data=self.request.POST)
-        form = MockNewListFromItemForm()
+    def test_can_save_a_POST_request(self):
+        self.new_list(self.request)
+
+        self.MockNewListFromItemForm.assert_called_once()
+        (_, call_kwargs) = self.MockNewListFromItemForm.call_args
+        self.assertEqual(call_kwargs['data'], self.request.POST)
+        form = self.MockNewListFromItemForm.return_value
         form.save.assert_called_once()
 
-    def test_saves_current_user_as_owner_if_authenticated(self, MockNewListFromItemForm):
+    def test_saves_current_user_as_owner_if_authenticated(self):
         logged_in_user = User(email='a@b.com')
         self.request.user = logged_in_user
 
-        new_list(self.request)
+        self.new_list(self.request)
 
-        MockNewListFromItemForm.assert_called_once_with(
-            data=self.request.POST, owner=logged_in_user)
-        form = MockNewListFromItemForm()
+        self.MockNewListFromItemForm.assert_called_once()
+        (_, call_kwargs) = self.MockNewListFromItemForm.call_args
+        self.assertEqual(call_kwargs['data'], self.request.POST)
+        self.assertEqual(call_kwargs['owner'], logged_in_user)
+        form = self.MockNewListFromItemForm.return_value
         form.save.assert_called_once()
 
     @patch('lists.views.redirect')
-    def test_redirects_after_POST(self, mock_redirect, MockNewListFromItemForm):
-        form = MockNewListFromItemForm()
+    def test_redirects_after_POST(self, mock_redirect):
+        form = self.MockNewListFromItemForm.return_value
 
-        response = new_list(self.request)
+        response = self.new_list(self.request)
 
         saved_list = form.save.return_value
         mock_redirect.assert_called_once_with(saved_list)
@@ -156,13 +169,12 @@ class NewListTest(unittest.TestCase):
     @patch('lists.views.render')
     def test_for_invalid_input_renders_home_template_with_form_containing_errors(
         self,
-        mock_render,
-        MockNewListFromItemForm
+        mock_render
     ):
-        form = MockNewListFromItemForm()
+        form = self.MockNewListFromItemForm.return_value
         form.is_valid.return_value = False
 
-        response = new_list(self.request)
+        response = self.new_list(self.request)
 
         mock_render.assert_called_once_with(
             self.request,
@@ -174,13 +186,12 @@ class NewListTest(unittest.TestCase):
     @patch('lists.views.render')
     def test_invalid_list_items_arent_saved(
         self,
-        mock_render,
-        MockNewListFromItemForm
+        mock_render
     ):
-        form = MockNewListFromItemForm()
+        form = self.MockNewListFromItemForm.return_value
         form.is_valid.return_value = False
 
-        response = new_list(self.request)
+        response = self.new_list(self.request)
 
         form.save.assert_not_called()
 
