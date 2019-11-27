@@ -19,7 +19,11 @@
           <a href="/" class="navbar-brand">Superlists</a>
           {% if user.is_authenticated %}
           <ul class="nav navbar-nav navbar-left">
-            <li class="nav-item"><a href="/lists/users/{{ user.email }}/" class="nav-link">My lists</a></li>
+            <li class="nav-item">
+              <a href="/lists/users/{{ user.email }}/" class="nav-link"
+                >My lists</a
+              >
+            </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="navbar-text">Logged in as {{ user.email }}</li>
@@ -90,10 +94,12 @@
     </div>
     <script src="{% static 'jquery-3.4.1.js' %}"></script>
     <script src="{% static 'list.js' %}"></script>
+    {% block scripts %}
     <script>
       $(document).ready(function() {
         window.Superlists.initialize();
       });
     </script>
+    {% endblock %}
   </body>
 </html>
