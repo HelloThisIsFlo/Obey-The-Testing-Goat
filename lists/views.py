@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
+from django.views.generic import FormView
 from textwrap import dedent
 
 from lists.models import Item, List
@@ -8,6 +9,10 @@ from lists.forms import ExistingListItemForm, NewListFromItemForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+
+class HomePageView(FormView):
+    template_name = 'home.html'
+    form_class = NewListFromItemForm
 
 def home_page(request):
     return render(request, 'home.html', {'form': NewListFromItemForm()})

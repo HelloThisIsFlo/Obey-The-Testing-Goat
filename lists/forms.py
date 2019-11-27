@@ -34,8 +34,8 @@ class ExistingListItemForm(ItemForm):
 
 
 class NewListFromItemForm(ItemForm):
-    def __init__(self, data=None, owner=None):
-        super().__init__(data=data)
+    def __init__(self, data=None, owner=None, *args, **kwargs):
+        super().__init__(data=data, *args, **kwargs)
         self.owner = owner
 
     def save(self):
