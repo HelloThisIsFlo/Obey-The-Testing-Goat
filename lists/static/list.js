@@ -6,15 +6,14 @@ window.Superlists.updateItems = function(url) {
     }
 
     const rows = [];
-    console.log(response);
-    response
+    response.items
       .map((item, index) => buildRow(index + 1, item.text))
       .forEach(row => rows.push(row));
 
     $("#id_list_table").html(rows);
   });
 };
-window.Superlists.initialize = function(url) {
+window.Superlists.initialize = function(params) {
   function hideError() {
     $(".has-error").hide();
   }
@@ -22,13 +21,14 @@ window.Superlists.initialize = function(url) {
   $('input[name="text"]').on("keypress", hideError);
   $('input[name="text"]').on("click", hideError);
 
-  if (url) {
-    window.Superlists.updateItems(url);
+  if (params) {
+    window.Superlists.updateItems(params.listApiUrl);
 
     const form = $("#id_item_form");
     form.on("submit", function(event) {
       event.preventDefault();
-      $.post(url, {
+      $.post(params.itemsApiUrl, {
+        list: params.listId,
         text: form.find('input[name="text"]').val(),
         csrfmiddlewaretoken: form
           .find('input[name="csrfmiddlewaretoken"]')
@@ -36,11 +36,10 @@ window.Superlists.initialize = function(url) {
       })
         .done(function(response) {
           $(".has-error").hide();
-          window.Superlists.updateItems(url);
+          window.Superlists.updateItems(params.listApiUrl);
         })
         .fail(function(xhr) {
           $(".has-error").show();
-          console.log(xhr)
           if (xhr.responseJSON && xhr.responseJSON.error) {
             $(".has-error .help-block").text(xhr.responseJSON.error);
           } else {

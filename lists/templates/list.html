@@ -12,8 +12,12 @@
   {% block scripts %}
   <script>
     $(document).ready(function() {
-      const url = "{% url 'api_list' list.id  %}";
-      window.Superlists.initialize(url);
+      const params = {
+        listApiUrl: '{% url 'list-detail' list.id %}',
+        itemsApiUrl: '{% url 'item-list' %}',
+        listId: {{ list.id }}
+      }
+      window.Superlists.initialize(params);
     });
   </script>
   {% endblock %}
